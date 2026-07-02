@@ -258,38 +258,40 @@ Apa yang terjadi:
 
 ## 9. Instalasi & Cara Menggunakan
 
-### Prasyarat
-
-- AI assistant yang mendukung sistem skill/agent: GitHub Copilot (VS Code), atau platform lain yang kompatibel.
-- Project kamu sudah dibuka di editor.
+**Prasyarat:** GitHub Copilot aktif di VS Code.
 
 ### Instalasi
 
-1. Clone atau download repository ini:
-   ```bash
-   git clone https://github.com/username/sigap
-   ```
+**Linux / Mac**
 
-2. Salin folder `.agents/` ke root project kamu:
-   ```bash
-   cp -r sigap/.agents/ /path/to/your-project/
-   ```
+```bash
+# 1. Clone repo
+git clone https://github.com/username/sigap
 
-3. Salin `skills-lock.json` ke root project kamu:
-   ```bash
-   cp sigap/skills-lock.json /path/to/your-project/
-   ```
+# 2. Masuk ke folder project kamu, lalu jalankan:
+cp -r /path/to/sigap/.agents/ .
+cp /path/to/sigap/skills-lock.json .
+```
 
-4. (Opsional) Personalisasi nama developer — buat file `.agents/developer-config.json`:
-   ```json
-   {
-     "name": "Nama Kamu"
-   }
-   ```
+**Windows (PowerShell)**
+
+```powershell
+# 1. Clone repo
+git clone https://github.com/username/sigap
+
+# 2. Masuk ke folder project kamu, lalu jalankan:
+Copy-Item -Recurse C:\path\to\sigap\.agents\ .
+Copy-Item C:\path\to\sigap\skills-lock.json .
+```
+
+> **(Opsional)** Untuk personalisasi nama developer, buat file `.agents/developer-config.json`:
+> ```json
+> { "name": "Nama Kamu" }
+> ```
 
 ### Cara Memanggil Skill
 
-Di GitHub Copilot Chat (VS Code), ketik nama skill diikuti instruksi kamu. Contoh:
+Di GitHub Copilot Chat (VS Code), ketik nama skill. Contoh:
 
 ```
 Gunakan skill brainstorm-prd untuk mulai project baru saya.
