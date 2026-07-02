@@ -262,28 +262,18 @@ Apa yang terjadi:
 
 ### Instalasi
 
+Masuk ke folder project kamu, lalu jalankan **satu perintah** berikut:
+
 **Linux / Mac**
 
 ```bash
-# 1. Masuk ke folder project kamu
-cd /path/to/your-project
-
-# 2. Clone repo SIGAP lalu salin file yang dibutuhkan
-git clone https://github.com/username/sigap
-cp -r sigap/.agents/ .
-cp sigap/skills-lock.json .
+curl -fsSL https://raw.githubusercontent.com/username/sigap/main/install.sh | bash
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
-# 1. Masuk ke folder project kamu
-cd C:\path\to\your-project
-
-# 2. Clone repo SIGAP lalu salin file yang dibutuhkan
-git clone https://github.com/username/sigap
-Copy-Item -Recurse sigap\.agents\ .
-Copy-Item sigap\skills-lock.json .
+irm https://raw.githubusercontent.com/username/sigap/main/install.ps1 | iex
 ```
 
 > **(Opsional)** Untuk personalisasi nama developer, buat file `.agents/developer-config.json`:
