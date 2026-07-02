@@ -265,23 +265,25 @@ Apa yang terjadi:
 **Linux / Mac**
 
 ```bash
-# 1. Clone repo
-git clone https://github.com/username/sigap
+# 1. Masuk ke folder project kamu
+cd /path/to/your-project
 
-# 2. Masuk ke folder project kamu, lalu jalankan:
-cp -r /path/to/sigap/.agents/ .
-cp /path/to/sigap/skills-lock.json .
+# 2. Clone repo SIGAP lalu salin file yang dibutuhkan
+git clone https://github.com/username/sigap
+cp -r sigap/.agents/ .
+cp sigap/skills-lock.json .
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
-# 1. Clone repo
-git clone https://github.com/username/sigap
+# 1. Masuk ke folder project kamu
+cd C:\path\to\your-project
 
-# 2. Masuk ke folder project kamu, lalu jalankan:
-Copy-Item -Recurse C:\path\to\sigap\.agents\ .
-Copy-Item C:\path\to\sigap\skills-lock.json .
+# 2. Clone repo SIGAP lalu salin file yang dibutuhkan
+git clone https://github.com/username/sigap
+Copy-Item -Recurse sigap\.agents\ .
+Copy-Item sigap\skills-lock.json .
 ```
 
 > **(Opsional)** Untuk personalisasi nama developer, buat file `.agents/developer-config.json`:
