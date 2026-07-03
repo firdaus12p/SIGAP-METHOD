@@ -25,7 +25,34 @@ fi
 
 rm -rf .agents
 cp -r "$TMP_DIR/macca/.agents/" .
-cp "$TMP_DIR/macca/skills-lock.json" .
+
+# ─── Update hanya skill yang terinstall (baca dari skills-lock.json) ─────────
+INSTALLED_SKILLS=()
+if command -v python3 &>/dev/null && [ -f "skills-lock.json" ]; then
+  mapfile -t INSTALLED_SKILLS < <(python3 -c "
+import json
+with open('skills-lock.json') as f:
+  d = json.load(f)
+for k in d.get('skills', {}):
+  print(k)
+")
+fi
+
+if [ ${#INSTALLED_SKILLS[@]} -gt 0 ]; then
+  # Hapus semua skill, lalu copy hanya yang dulu terpasang
+  rm -rf .agents/skills
+  mkdir -p .agents/skills
+  echo "  Memperbarui skill:"
+  for SKILL in "${INSTALLED_SKILLS[@]}"; do
+    if [ -d "$TMP_DIR/macca/.agents/skills/$SKILL" ]; then
+      cp -r "$TMP_DIR/macca/.agents/skills/$SKILL" .agents/skills/
+      echo "    + $SKILL"
+    fi
+  done
+else
+  echo "  skills-lock.json tidak ditemukan — semua skill diupdate."
+  cp -r "$TMP_DIR/macca/skills-lock.json" .
+fi
 
 # ─── Restore user configs ─────────────────────────────────────────────────────
 [ -n "$CONFIG_BACKUP" ] && echo "$CONFIG_BACKUP" > .agents/developer-config.json

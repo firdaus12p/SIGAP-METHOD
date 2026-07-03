@@ -85,36 +85,63 @@ install_tool() {
   esac
 }
 
-# ─── Tool selection menu ──────────────────────────────────────────────────────────
+# ─── Tool selection (checkbox) ────────────────────────────────────────────────
+ALL_TOOL_NAMES=("GitHub Copilot" "Cursor" "Claude Code" "Windsurf" "Gemini CLI" "OpenCode" "Kilo Code" "Codex (OpenAI)" "Kimi CLI")
+ALL_TOOL_PATHS=(".github/skills/" ".claude/skills/" ".claude/skills/" ".windsurf/skills/" ".gemini/skills/" ".opencode/skill/" ".kilo/skills/" ".agents/skills/ (native)" "~/.config/agents/skills/")
+ALL_TOOL_KEYS=("copilot" "cursor" "claude" "windsurf" "gemini" "opencode" "kilo" "codex" "kimi")
+TOOL_SELECTED=()
+
+show_tool_checkboxes() {
+  for i in "${!ALL_TOOL_NAMES[@]}"; do
+    local mark="[ ]"
+    for s in "${TOOL_SELECTED[@]}"; do
+      [[ "$s" == "${ALL_TOOL_KEYS[$i]}" ]] && mark="[x]" && break
+    done
+    printf "    %s %2d. %-20s → %s\n" "$mark" "$((i+1))" "${ALL_TOOL_NAMES[$i]}" "${ALL_TOOL_PATHS[$i]}"
+  done
+  echo ""
+}
+
+toggle_tool() {
+  local IDX=$(($1 - 1))
+  local KEY="${ALL_TOOL_KEYS[$IDX]}"
+  local FOUND=false
+  local NEW=()
+  for s in "${TOOL_SELECTED[@]}"; do
+    [[ "$s" == "$KEY" ]] && FOUND=true || NEW+=("$s")
+  done
+  if [ "$FOUND" = true ]; then
+    TOOL_SELECTED=("${NEW[@]+"${NEW[@]}"}")
+  else
+    TOOL_SELECTED+=("$KEY")
+  fi
+}
+
 echo ""
 echo "  Pilih AI tool yang kamu gunakan:"
-echo "  (ketik nomor, pisahkan spasi — contoh: 1 3 4)"
-echo "  (ketik 0 untuk pilih semua)"
-echo ""
-echo "  [1] GitHub Copilot       → .github/skills/"
-echo "  [2] Cursor               → .claude/skills/  (Claude Code compatible)"
-echo "  [3] Claude Code          → .claude/skills/"
-echo "  [4] Windsurf             → .windsurf/skills/"
-echo "  [5] Gemini CLI           → .gemini/skills/"
-echo "  [6] OpenCode             → .opencode/skill/"
-echo "  [7] Kilo Code            → .kilo/skills/"
-echo "  [8] Codex (OpenAI)       → .agents/skills/  (native — tidak perlu konfigurasi tambahan)"
-echo "  [9] Kimi CLI             → ~/.config/agents/skills/"
-echo ""
-read -r -p "  Pilihanmu: " CHOICES </dev/tty
+echo "  ketik nomor untuk centang/hapus centang, Enter untuk konfirmasi"
+show_tool_checkboxes
 
-if [[ -z "$CHOICES" ]]; then
+while true; do
+  read -r -p "  > " INPUT </dev/tty
+  [[ -z "$INPUT" ]] && break
+  for NUM in $INPUT; do
+    [[ "$NUM" =~ ^[0-9]+$ ]] || continue
+    IDX=$((NUM - 1))
+    [[ $IDX -ge 0 && $IDX -lt ${#ALL_TOOL_KEYS[@]} ]] && toggle_tool "$NUM"
+  done
+  show_tool_checkboxes
+done
+
+if [ ${#TOOL_SELECTED[@]} -eq 0 ]; then
   echo ""
-  echo "  Tidak ada pilihan — menggunakan .agents/skills/ sebagai default."
-  echo "  ℹ  Format ini kompatibel dengan:"
-  echo "      Codex (OpenAI) · GitHub Copilot · Gemini CLI · Windsurf · Continue.dev"
+  echo "  Tidak ada AI tool dipilih — menggunakan .agents/skills/ sebagai default."
   SELECTED+=("codex")
 else
-  [[ "$CHOICES" == "0" ]] && CHOICES="1 2 3 4 5 6 7 8 9"
   echo ""
   echo "  Menyalin skills:"
-  for NUM in $CHOICES; do
-    install_tool "$NUM"
+  for KEY in "${TOOL_SELECTED[@]}"; do
+    install_tool "$KEY"
   done
 fi
 

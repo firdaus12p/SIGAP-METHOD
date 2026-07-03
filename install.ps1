@@ -36,83 +36,62 @@ function Copy-Skills($Dest) {
   }
 }
 
-# ─── Tool selection menu ───────────────────────────────────────────────────────
-Write-Host ""
-Write-Host "  Pilih AI tool yang kamu gunakan:"
-Write-Host "  (ketik nomor, pisahkan spasi - contoh: 1 3 4)"
-Write-Host "  (ketik 0 untuk pilih semua)"
-Write-Host ""
-Write-Host "  [1] GitHub Copilot       -> .github\skills\"
-Write-Host "  [2] Cursor               -> .claude\skills\  (Claude Code compatible)"
-Write-Host "  [3] Claude Code          -> .claude\skills\"
-Write-Host "  [4] Windsurf             -> .windsurf\skills\"
-Write-Host "  [5] Gemini CLI           -> .gemini\skills\"
-Write-Host "  [6] OpenCode             -> .opencode\skill\"
-Write-Host "  [7] Kilo Code            -> .kilo\skills\"
-Write-Host "  [8] Codex (OpenAI)       -> .agents\skills\  (native — tidak perlu konfigurasi tambahan)"
-Write-Host "  [9] Kimi CLI             -> AppData\Roaming\agents\skills\"
-Write-Host ""
-$RawChoice = Read-Host "  Pilihanmu"
-$Choices   = ($RawChoice -split ' ') | Where-Object { $_ -ne "" }
+# ─── Tool selection (checkbox) ────────────────────────────────────────────────
+$AllToolNames = @("GitHub Copilot","Cursor","Claude Code","Windsurf","Gemini CLI","OpenCode","Kilo Code","Codex (OpenAI)","Kimi CLI")
+$AllToolPaths = @(".github\skills\",".claude\skills\",".claude\skills\",".windsurf\skills\",".gemini\skills\",".opencode\skill\",".kilo\skills\",".agents\skills\ (native)","AppData\Roaming\agents\skills\")
+$AllToolKeys  = @("copilot","cursor","claude","windsurf","gemini","opencode","kilo","codex","kimi")
+$ToolSelected = [System.Collections.ArrayList]@()
 
-if ([string]::IsNullOrWhiteSpace($RawChoice)) {
+function Show-ToolCheckboxes {
   Write-Host ""
-  Write-Host "  Tidak ada pilihan — menggunakan .agents\skills\ sebagai default."
-  Write-Host "  i  Format ini kompatibel dengan:"
-  Write-Host "      Codex (OpenAI) · GitHub Copilot · Gemini CLI · Windsurf · Continue.dev"
-  $Selected += 'codex'
-} else {
-  if ($Choices -contains '0') { $Choices = '1','2','3','4','5','6','7','8','9' }
+  for ($i = 0; $i -lt $AllToolNames.Count; $i++) {
+    $mark = if ($ToolSelected -contains $AllToolKeys[$i]) { "[x]" } else { "[ ]" }
+    Write-Host ("    {0} {1,2}. {2,-20} -> {3}" -f $mark, ($i + 1), $AllToolNames[$i], $AllToolPaths[$i])
+  }
   Write-Host ""
-  Write-Host "  Menyalin skills:"
 }
 
-foreach ($Num in $Choices) {
-  switch ($Num.Trim()) {
-    '1' {
-      Copy-Skills ".github\skills"
-      $Selected += 'copilot'
-      Write-Host "  v GitHub Copilot    -> .github\skills\"
-    }
-    '2' {
-      if (-not $ClaudeCopied) { Copy-Skills ".claude\skills"; $ClaudeCopied = $true }
-      $Selected += 'cursor'
-      Write-Host "  v Cursor            -> .claude\skills\ (Claude Code compatible)"
-    }
-    '3' {
-      if (-not $ClaudeCopied) { Copy-Skills ".claude\skills"; $ClaudeCopied = $true }
-      $Selected += 'claude'
-      Write-Host "  v Claude Code       -> .claude\skills\"
-    }
-    '4' {
-      Copy-Skills ".windsurf\skills"
-      $Selected += 'windsurf'
-      Write-Host "  v Windsurf          -> .windsurf\skills\"
-    }
-    '5' {
-      Copy-Skills ".gemini\skills"
-      $Selected += 'gemini'
-      Write-Host "  v Gemini CLI        -> .gemini\skills\"
-    }
-    '6' {
-      Copy-Skills ".opencode\skill"
-      $Selected += 'opencode'
-      Write-Host "  v OpenCode          -> .opencode\skill\"
-    }
-    '7' {
-      Copy-Skills ".kilo\skills"
-      $Selected += 'kilo'
-      Write-Host "  v Kilo Code         -> .kilo\skills\"
-    }
-    '8' {
-      $Selected += 'codex'
-      Write-Host "  v Codex (OpenAI)    -> .agents\skills\ (format native Codex, tidak ada file tambahan)"
-    }
-    '9' {
-      $KimiDir = Join-Path $env:APPDATA "agents\skills"
-      Copy-Skills $KimiDir
-      $Selected += 'kimi'
-      Write-Host "  v Kimi CLI          -> $KimiDir"
+function Toggle-Tool($Num) {
+  $idx = [int]$Num - 1
+  if ($idx -ge 0 -and $idx -lt $AllToolKeys.Count) {
+    $key = $AllToolKeys[$idx]
+    if ($ToolSelected -contains $key) { $ToolSelected.Remove($key) | Out-Null }
+    else { $ToolSelected.Add($key) | Out-Null }
+  }
+}
+
+Write-Host ""
+Write-Host "  Pilih AI tool yang kamu gunakan:"
+Write-Host "  ketik nomor untuk centang/hapus centang, Enter untuk konfirmasi"
+Show-ToolCheckboxes
+
+while ($true) {
+  $Input = Read-Host "  >"
+  if ([string]::IsNullOrWhiteSpace($Input)) { break }
+  foreach ($Num in ($Input -split '\s+')) {
+    if ($Num -match '^\d+$') { Toggle-Tool $Num }
+  }
+  Show-ToolCheckboxes
+}
+
+if ($ToolSelected.Count -eq 0) {
+  Write-Host ""
+  Write-Host "  Tidak ada AI tool dipilih — menggunakan .agents\skills\ sebagai default."
+  $Selected += 'codex'
+} else {
+  Write-Host ""
+  Write-Host "  Menyalin skills:"
+  foreach ($Key in $ToolSelected) {
+    switch ($Key) {
+      'copilot'  { Copy-Skills ".github\skills";   $Selected += 'copilot';  Write-Host "  v GitHub Copilot  -> .github\skills\" }
+      'cursor'   { if (-not $ClaudeCopied) { Copy-Skills ".claude\skills"; $ClaudeCopied = $true }; $Selected += 'cursor';  Write-Host "  v Cursor          -> .claude\skills\" }
+      'claude'   { if (-not $ClaudeCopied) { Copy-Skills ".claude\skills"; $ClaudeCopied = $true }; $Selected += 'claude';  Write-Host "  v Claude Code     -> .claude\skills\" }
+      'windsurf' { Copy-Skills ".windsurf\skills";  $Selected += 'windsurf'; Write-Host "  v Windsurf        -> .windsurf\skills\" }
+      'gemini'   { Copy-Skills ".gemini\skills";    $Selected += 'gemini';   Write-Host "  v Gemini CLI      -> .gemini\skills\" }
+      'opencode' { Copy-Skills ".opencode\skill";   $Selected += 'opencode'; Write-Host "  v OpenCode        -> .opencode\skill\" }
+      'kilo'     { Copy-Skills ".kilo\skills";      $Selected += 'kilo';     Write-Host "  v Kilo Code       -> .kilo\skills\" }
+      'codex'    { $Selected += 'codex'; Write-Host "  v Codex (OpenAI)  -> .agents\skills\ (native)" }
+      'kimi'     { $KimiDir = Join-Path $env:APPDATA "agents\skills"; Copy-Skills $KimiDir; $Selected += 'kimi'; Write-Host "  v Kimi CLI        -> $KimiDir" }
     }
   }
 }
