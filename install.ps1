@@ -133,5 +133,5 @@ if ($DEV_NAME -ne "" -or $PROJECT_NAME -ne "") {
 # ─── Cleanup & done ────────────────────────────────────────────────────────────
 Remove-Item -Recurse -Force $TMP_DIR
 Write-Host ""
-Write-Host "  v MACCA installed!
+Write-Host "  v MACCA installed!"
 Write-Host ""

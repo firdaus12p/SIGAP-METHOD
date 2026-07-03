@@ -5,6 +5,7 @@ REPO_URL="https://github.com/firdaus12p/MACCA-METHOD"
 TMP_DIR=$(mktemp -d)
 SELECTED=()
 CLAUDE_COPIED=0
+trap 'rm -rf "$TMP_DIR" 2>/dev/null; exit' INT TERM EXIT
 
 # ─── Banner ────────────────────────────────────────────────────────────────────
 echo ""
@@ -111,8 +112,8 @@ checkbox_select() {
     if [[ "$k" == $'\x1b' ]]; then
       IFS= read -r -s -n1 -t 0.1 k2 </dev/tty
       IFS= read -r -s -n1 -t 0.1 k3 </dev/tty
-      [[ "$k2$k3" == '[A' && $cursor -gt 0 ]]        && ((cursor--))
-      [[ "$k2$k3" == '[B' && $cursor -lt $((n-1)) ]]  && ((cursor++))
+      [[ "$k2$k3" == '[A' && $cursor -gt 0 ]]        && cursor=$((cursor - 1))
+      [[ "$k2$k3" == '[B' && $cursor -lt $((n-1)) ]]  && cursor=$((cursor + 1))
     elif [[ "$k" == ' ' ]];  then checked[$cursor]=$((1-checked[$cursor]))
     elif [[ "$k" == '' ]]; then break
     fi
@@ -171,6 +172,7 @@ fi
 
 # ─── Cleanup & done ────────────────────────────────────────────────────────────────
 rm -rf "$TMP_DIR"
+trap - INT TERM EXIT
 echo ""
 echo "  ✓ MACCA installed!"
 echo ""
