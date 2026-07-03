@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO_URL="https://github.com/firdaus12p/SIGAP---METHOD"
+REPO_URL="https://github.com/firdaus12p/MACCA-METHOD"
 TMP_DIR=$(mktemp -d)
 SELECTED=()
 CLAUDE_COPIED=0

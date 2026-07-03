@@ -284,13 +284,13 @@ Masuk ke folder project kamu, lalu jalankan **satu perintah** berikut:
 **Linux / Mac**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/firdaus12p/SIGAP---METHOD/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/firdaus12p/MACCA-METHOD/main/install.sh | bash
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
-irm https://raw.githubusercontent.com/firdaus12p/SIGAP---METHOD/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/firdaus12p/MACCA-METHOD/main/install.ps1 | iex
 ```
 
 Installer akan menampilkan menu pilihan AI tool:
@@ -320,13 +320,13 @@ Dari dalam folder project kamu:
 **Linux / Mac**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/firdaus12p/SIGAP---METHOD/main/upgrade.sh | bash
+curl -fsSL https://raw.githubusercontent.com/firdaus12p/MACCA-METHOD/main/upgrade.sh | bash
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
-irm https://raw.githubusercontent.com/firdaus12p/SIGAP---METHOD/main/upgrade.ps1 | iex
+irm https://raw.githubusercontent.com/firdaus12p/MACCA-METHOD/main/upgrade.ps1 | iex
 ```
 
 > `project-context/` dan `developer-config.json` kamu **tidak akan tersentuh** saat upgrade. Skills di semua folder tool **diperbarui otomatis** sesuai pilihan saat install.
