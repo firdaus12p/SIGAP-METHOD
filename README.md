@@ -1,4 +1,4 @@
-# SIGAP — Spec-Driven AI Development System
+# SIGAP
 
 **SIGAP** adalah sistem pengembangan perangkat lunak berbasis AI yang bekerja dari **spesifikasi tertulis**, bukan tebakan. Sebelum ada satu baris kode pun, semua keputusan penting sudah didokumentasikan. AI bekerja sesuai dokumen itu — bukan asumsi.
 
@@ -267,19 +267,16 @@ Masuk ke folder project kamu, lalu jalankan **satu perintah** berikut:
 **Linux / Mac**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/username/sigap/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/firdaus12p/SIGAP---METHOD/main/install.sh | bash
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
-irm https://raw.githubusercontent.com/username/sigap/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/firdaus12p/SIGAP---METHOD/main/install.ps1 | iex
 ```
 
-> **(Opsional)** Untuk personalisasi nama developer, buat file `.agents/developer-config.json`:
-> ```json
-> { "name": "Nama Kamu" }
-> ```
+Installer akan meminta nama developer di akhir proses (opsional, bisa dikosongkan).
 
 ### Cara Memanggil Skill
 
