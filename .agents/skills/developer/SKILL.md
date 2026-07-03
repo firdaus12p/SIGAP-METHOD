@@ -286,7 +286,8 @@ Tujuan: mengunci signature dan behavior sebelum satu baris kode ditulis.
 
 **Deteksi jenis task terlebih dahulu:**
 - Jika task ini adalah **test task** (nama task mengandung “test”, “uji”, atau ditandai sebagai test di Task.md): langsung tulis test, lanjut ke 3c.5.
-- Jika task ini adalah **implementasi**: ikuti urutan TDD di bawah.
+- Jika task ini adalah **implementasi dengan dependensi ke task test** (ada dependensi eksplisit ke task N-1 yang bertipe test dan sudah selesai `[x]`): **lewati 3c-1**, langsung ke 3c-2 — test sudah ditulis oleh task sebelumnya.
+- Jika task ini adalah **implementasi standalone** (tidak ada task test terpisah sebagai dependensi): ikuti urutan TDD di bawah.
 
 **3c-1. Tulis test terlebih dahulu:**
 Sebelum menulis implementasi, tulis test case untuk fungsi/endpoint yang akan dibuat:
@@ -354,9 +355,11 @@ Selesai! [nama task] sudah done.
 Yang saya buat/ubah:
 - [path/file] — [deskripsi satu baris]
 - [path/file] — [deskripsi satu baris]
-
-Lanjut ke task berikutnya...
 ```
+
+Setelah laporan, cek `Task.md § Aturan Eksekusi`:
+- Jika aturan **"berhenti setelah setiap task"**: **berhenti dan tunggu konfirmasi user** sebelum lanjut ke task berikutnya.
+- Jika aturan **"berhenti setelah setiap fase"** (default): lanjutkan otomatis ke task berikutnya.
 
 ---
 
