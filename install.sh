@@ -1,11 +1,11 @@
 #!/bin/bash
-set -e
+# set -e dihapus — gunakan error handling eksplisit
 
 REPO_URL="https://github.com/firdaus12p/MACCA-METHOD"
 TMP_DIR=$(mktemp -d)
 SELECTED=()
 CLAUDE_COPIED=0
-trap 'rm -rf "$TMP_DIR" 2>/dev/null; exit' INT TERM EXIT
+trap 'rm -rf "$TMP_DIR" 2>/dev/null' INT TERM EXIT
 
 # ─── Banner ────────────────────────────────────────────────────────────────────
 echo ""
@@ -112,8 +112,8 @@ checkbox_select() {
     if [[ "$k" == $'\x1b' ]]; then
       IFS= read -r -s -n1 -t 0.1 k2 </dev/tty
       IFS= read -r -s -n1 -t 0.1 k3 </dev/tty
-      [[ "$k2$k3" == '[A' && $cursor -gt 0 ]]        && cursor=$((cursor - 1))
-      [[ "$k2$k3" == '[B' && $cursor -lt $((n-1)) ]]  && cursor=$((cursor + 1))
+      if [[ "$k2$k3" == '[A' && $cursor -gt 0 ]];        then cursor=$((cursor - 1)); fi
+      if [[ "$k2$k3" == '[B' && $cursor -lt $((n-1)) ]]; then cursor=$((cursor + 1)); fi
     elif [[ "$k" == ' ' ]];  then checked[$cursor]=$((1-checked[$cursor]))
     elif [[ "$k" == '' ]]; then break
     fi
@@ -121,7 +121,9 @@ checkbox_select() {
   done
   printf "\n"
   _cb_indices=()
-  for ((i=0;i<n;i++)); do [[ ${checked[$i]} -eq 1 ]] && _cb_indices+=("$i"); done
+  for ((i=0;i<n;i++)); do
+    if [[ ${checked[$i]} -eq 1 ]]; then _cb_indices+=("$i"); fi
+  done
 }
 
 # ─── Pilih AI provider ────────────────────────────────────────────────────────
@@ -154,8 +156,12 @@ fi
 
 # Hapus .agents/skills/ kecuali jika codex dipilih
 KEEP=false
-for KEY in "${TOOL_SELECTED[@]}"; do [[ "$KEY" == "codex" ]] && KEEP=true; done
-[ "$KEEP" = false ] && [ ${#TOOL_SELECTED[@]} -gt 0 ] && rm -rf .agents/skills
+for KEY in "${TOOL_SELECTED[@]}"; do
+  if [[ "$KEY" == "codex" ]]; then KEEP=true; fi
+done
+if [ "$KEEP" = false ] && [ ${#TOOL_SELECTED[@]} -gt 0 ]; then
+  rm -rf .agents/skills
+fi
 
 # ─── Save selected tools ───────────────────────────────────────────────────────────
 printf '%s\n' "${SELECTED[@]}" > .agents/macca-tools.txt
@@ -166,8 +172,8 @@ read -r -p "  Kamu mau di panggil apa? (Kosong = Skip): " DEV_NAME </dev/tty
 read -r -p "  Nama project ini apa? (Kosong = Skip): " PROJECT_NAME </dev/tty
 if [ -n "$DEV_NAME" ] || [ -n "$PROJECT_NAME" ]; then
   printf '{\n  "name": "%s",\n  "project": "%s"\n}\n' "$DEV_NAME" "$PROJECT_NAME" > .agents/developer-config.json
-  [ -n "$DEV_NAME" ]     && echo "  Nama developer disimpan: $DEV_NAME"
-  [ -n "$PROJECT_NAME" ] && echo "  Nama project disimpan:   $PROJECT_NAME"
+  if [ -n "$DEV_NAME" ];     then echo "  Nama developer disimpan: $DEV_NAME"; fi
+  if [ -n "$PROJECT_NAME" ]; then echo "  Nama project disimpan:   $PROJECT_NAME"; fi
 fi
 
 # ─── Cleanup & done ────────────────────────────────────────────────────────────────
