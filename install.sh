@@ -123,8 +123,8 @@ printf '%s\n' "${SELECTED[@]}" > .agents/macca-tools.txt
 
 # ─── Nama developer & project ───────────────────────────────────────────────────────────────────────────────────
 echo ""
-read -r -p "  Kamu mau di panggil apa? (kosongkan untuk skip): " DEV_NAME </dev/tty
-read -r -p "  Nama project ini apa?    (kosongkan untuk skip): " PROJECT_NAME </dev/tty
+read -r -p "  Kamu mau di panggil apa? (Kosong = Skip): " DEV_NAME </dev/tty
+read -r -p "  Nama project ini apa? (Kosong = Skip): " PROJECT_NAME </dev/tty
 if [ -n "$DEV_NAME" ] || [ -n "$PROJECT_NAME" ]; then
   printf '{\n  "name": "%s",\n  "project": "%s"\n}\n' "$DEV_NAME" "$PROJECT_NAME" > .agents/developer-config.json
   [ -n "$DEV_NAME" ]     && echo "  Nama developer disimpan: $DEV_NAME"

@@ -122,8 +122,8 @@ Set-Content ".agents\macca-tools.txt" ($Selected -join "`n")
 
 # ─── Nama developer & project ─────────────────────────────────────────────────
 Write-Host ""
-$DEV_NAME     = Read-Host "  Kamu mau di panggil apa? (kosongkan untuk skip)"
-$PROJECT_NAME = Read-Host "  Nama project ini apa?    (kosongkan untuk skip)"
+$DEV_NAME     = Read-Host "  Kamu mau di panggil apa? (Kosong = Skip)"
+$PROJECT_NAME = Read-Host "  Nama project ini apa? (Kosong = Skip)"
 if ($DEV_NAME -ne "" -or $PROJECT_NAME -ne "") {
   Set-Content -Path ".agents\developer-config.json" -Value "{`n  `"name`": `"$DEV_NAME`",`n  `"project`": `"$PROJECT_NAME`"`n}"
   if ($DEV_NAME -ne "")     { Write-Host "  Nama developer disimpan: $DEV_NAME" }
@@ -133,5 +133,5 @@ if ($DEV_NAME -ne "" -or $PROJECT_NAME -ne "") {
 # ─── Cleanup & done ────────────────────────────────────────────────────────────
 Remove-Item -Recurse -Force $TMP_DIR
 Write-Host ""
-Write-Host "  v MACCA installed! Ketik: gunakan skill help"
+Write-Host "  v MACCA installed!
 Write-Host ""
