@@ -85,65 +85,76 @@ install_tool() {
   esac
 }
 
-# ─── Tool selection (checkbox) ────────────────────────────────────────────────
-ALL_TOOL_NAMES=("GitHub Copilot" "Cursor" "Claude Code" "Windsurf" "Gemini CLI" "OpenCode" "Kilo Code" "Codex (OpenAI)" "Kimi CLI")
-ALL_TOOL_PATHS=(".github/skills/" ".claude/skills/" ".claude/skills/" ".windsurf/skills/" ".gemini/skills/" ".opencode/skill/" ".kilo/skills/" ".agents/skills/ (native)" "~/.config/agents/skills/")
-ALL_TOOL_KEYS=("copilot" "cursor" "claude" "windsurf" "gemini" "opencode" "kilo" "codex" "kimi")
-TOOL_SELECTED=()
+# ─── Checkbox selector (↑/↓ Spasi Enter) ─────────────────────────────────────
+_cb_indices=()
+checkbox_select() {
+  local items=("$@") n=${#items[@]} cursor=0 i
+  local checked=()
+  for ((i=0;i<n;i++)); do checked[$i]=0; done
 
-show_tool_checkboxes() {
-  for i in "${!ALL_TOOL_NAMES[@]}"; do
-    local mark="[ ]"
-    for s in "${TOOL_SELECTED[@]}"; do
-      [[ "$s" == "${ALL_TOOL_KEYS[$i]}" ]] && mark="[x]" && break
+  _render() {
+    for ((i=0;i<n;i++)); do
+      local m; [[ ${checked[$i]} -eq 1 ]] && m="[x]" || m="[ ]"
+      if [[ $i -eq $cursor ]]; then
+        printf "  \033[7m %s  %s \033[0m\n" "$m" "${items[$i]}"
+      else
+        printf "    %s  %s\n" "$m" "${items[$i]}"
+      fi
     done
-    printf "    %s %2d. %-20s → %s\n" "$mark" "$((i+1))" "${ALL_TOOL_NAMES[$i]}" "${ALL_TOOL_PATHS[$i]}"
+    printf "\n  \033[2m↑/↓ navigasi  ·  Spasi pilih  ·  Enter konfirmasi\033[0m\n"
+  }
+
+  printf "\n"; _render
+  while true; do
+    local k k2 k3
+    IFS= read -r -s -n1 k </dev/tty
+    if [[ "$k" == $'\x1b' ]]; then
+      IFS= read -r -s -n1 -t 0.1 k2 </dev/tty
+      IFS= read -r -s -n1 -t 0.1 k3 </dev/tty
+      [[ "$k2$k3" == '[A' && $cursor -gt 0 ]]        && ((cursor--))
+      [[ "$k2$k3" == '[B' && $cursor -lt $((n-1)) ]]  && ((cursor++))
+    elif [[ "$k" == ' ' ]];  then checked[$cursor]=$((1-checked[$cursor]))
+    elif [[ "$k" == '' ]]; then break
+    fi
+    printf "\033[%dA" $((n+2)); _render
   done
-  echo ""
+  printf "\n"
+  _cb_indices=()
+  for ((i=0;i<n;i++)); do [[ ${checked[$i]} -eq 1 ]] && _cb_indices+=("$i"); done
 }
 
-toggle_tool() {
-  local IDX=$(($1 - 1))
-  local KEY="${ALL_TOOL_KEYS[$IDX]}"
-  local FOUND=false
-  local NEW=()
-  for s in "${TOOL_SELECTED[@]}"; do
-    [[ "$s" == "$KEY" ]] && FOUND=true || NEW+=("$s")
-  done
-  if [ "$FOUND" = true ]; then
-    TOOL_SELECTED=("${NEW[@]+"${NEW[@]}"}")
-  else
-    TOOL_SELECTED+=("$KEY")
-  fi
-}
+# ─── Pilih AI provider ────────────────────────────────────────────────────────
+DISPLAY=(
+  "GitHub Copilot    → .github/skills/"
+  "Cursor            → .claude/skills/"
+  "Claude Code       → .claude/skills/"
+  "Windsurf          → .windsurf/skills/"
+  "Gemini CLI        → .gemini/skills/"
+  "OpenCode          → .opencode/skill/"
+  "Kilo Code         → .kilo/skills/"
+  "Codex / OpenAI    → .agents/skills/  (native)"
+  "Kimi CLI          → ~/.config/agents/skills/"
+)
+KEYS=("copilot" "cursor" "claude" "windsurf" "gemini" "opencode" "kilo" "codex" "kimi")
 
-echo ""
-echo "  Pilih AI tool yang kamu gunakan:"
-echo "  ketik nomor untuk centang/hapus centang, Enter untuk konfirmasi"
-show_tool_checkboxes
+echo "  Pilih AI provider yang kamu gunakan:"
+checkbox_select "${DISPLAY[@]}"
 
-while true; do
-  read -r -p "  > " INPUT </dev/tty
-  [[ -z "$INPUT" ]] && break
-  for NUM in $INPUT; do
-    [[ "$NUM" =~ ^[0-9]+$ ]] || continue
-    IDX=$((NUM - 1))
-    [[ $IDX -ge 0 && $IDX -lt ${#ALL_TOOL_KEYS[@]} ]] && toggle_tool "$NUM"
-  done
-  show_tool_checkboxes
-done
+TOOL_SELECTED=()
+for idx in "${_cb_indices[@]}"; do TOOL_SELECTED+=("${KEYS[$idx]}"); done
 
 if [ ${#TOOL_SELECTED[@]} -eq 0 ]; then
-  echo ""
-  echo "  Tidak ada AI tool dipilih — menggunakan .agents/skills/ sebagai default."
+  echo "  Tidak ada provider dipilih — default ke .agents/skills/"
   SELECTED+=("codex")
 else
-  echo ""
   echo "  Menyalin skills:"
-  for KEY in "${TOOL_SELECTED[@]}"; do
-    install_tool "$KEY"
-  done
+  for KEY in "${TOOL_SELECTED[@]}"; do install_tool "$KEY"; done
 fi
+
+# Hapus .agents/skills/ kecuali jika codex dipilih
+KEEP=false
+for KEY in "${TOOL_SELECTED[@]}"; do [[ "$KEY" == "codex" ]] && KEEP=true; done
+[ "$KEEP" = false ] && [ ${#TOOL_SELECTED[@]} -gt 0 ] && rm -rf .agents/skills
 
 # ─── Save selected tools ───────────────────────────────────────────────────────────
 printf '%s\n' "${SELECTED[@]}" > .agents/macca-tools.txt

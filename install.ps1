@@ -36,50 +36,66 @@ function Copy-Skills($Dest) {
   }
 }
 
-# ─── Tool selection (checkbox) ────────────────────────────────────────────────
-$AllToolNames = @("GitHub Copilot","Cursor","Claude Code","Windsurf","Gemini CLI","OpenCode","Kilo Code","Codex (OpenAI)","Kimi CLI")
-$AllToolPaths = @(".github\skills\",".claude\skills\",".claude\skills\",".windsurf\skills\",".gemini\skills\",".opencode\skill\",".kilo\skills\",".agents\skills\ (native)","AppData\Roaming\agents\skills\")
-$AllToolKeys  = @("copilot","cursor","claude","windsurf","gemini","opencode","kilo","codex","kimi")
-$ToolSelected = [System.Collections.ArrayList]@()
+# ─── Checkbox selector (↑/↓ Spasi Enter) ────────────────────────────────────
+$AllToolDisplay = @(
+  "GitHub Copilot    -> .github\skills\"
+  "Cursor            -> .claude\skills\"
+  "Claude Code       -> .claude\skills\"
+  "Windsurf          -> .windsurf\skills\"
+  "Gemini CLI        -> .gemini\skills\"
+  "OpenCode          -> .opencode\skill\"
+  "Kilo Code         -> .kilo\skills\"
+  "Codex / OpenAI    -> .agents\skills\ (native)"
+  "Kimi CLI          -> AppData\Roaming\agents\skills\"
+)
+$AllToolKeys = @("copilot","cursor","claude","windsurf","gemini","opencode","kilo","codex","kimi")
+$checked     = @($false) * $AllToolDisplay.Count
+$cursor      = 0
+$n           = $AllToolDisplay.Count
 
-function Show-ToolCheckboxes {
-  Write-Host ""
-  for ($i = 0; $i -lt $AllToolNames.Count; $i++) {
-    $mark = if ($ToolSelected -contains $AllToolKeys[$i]) { "[x]" } else { "[ ]" }
-    Write-Host ("    {0} {1,2}. {2,-20} -> {3}" -f $mark, ($i + 1), $AllToolNames[$i], $AllToolPaths[$i])
+function Render-Tools {
+  for ($i = 0; $i -lt $n; $i++) {
+    $m = if ($checked[$i]) { "[x]" } else { "[ ]" }
+    if ($i -eq $cursor) {
+      Write-Host ("  `e[7m {0}  {1} `e[0m" -f $m, $AllToolDisplay[$i])
+    } else {
+      Write-Host ("    {0}  {1}" -f $m, $AllToolDisplay[$i])
+    }
   }
   Write-Host ""
-}
-
-function Toggle-Tool($Num) {
-  $idx = [int]$Num - 1
-  if ($idx -ge 0 -and $idx -lt $AllToolKeys.Count) {
-    $key = $AllToolKeys[$idx]
-    if ($ToolSelected -contains $key) { $ToolSelected.Remove($key) | Out-Null }
-    else { $ToolSelected.Add($key) | Out-Null }
-  }
+  Write-Host "  " -NoNewline
+  Write-Host "↑/↓ navigasi  ·  Spasi pilih  ·  Enter konfirmasi" -ForegroundColor DarkGray
 }
 
 Write-Host ""
-Write-Host "  Pilih AI tool yang kamu gunakan:"
-Write-Host "  ketik nomor untuk centang/hapus centang, Enter untuk konfirmasi"
-Show-ToolCheckboxes
+Write-Host "  Pilih AI provider yang kamu gunakan:"
+[System.Console]::CursorVisible = $false
+Write-Host ""
+Render-Tools
 
 while ($true) {
-  $Input = Read-Host "  >"
-  if ([string]::IsNullOrWhiteSpace($Input)) { break }
-  foreach ($Num in ($Input -split '\s+')) {
-    if ($Num -match '^\d+$') { Toggle-Tool $Num }
+  $key = [System.Console]::ReadKey($true)
+  if ($key.Key -eq 'Enter') { break }
+  switch ($key.Key) {
+    'UpArrow'   { if ($cursor -gt 0)    { $cursor-- } }
+    'DownArrow' { if ($cursor -lt $n-1) { $cursor++ } }
+    'Spacebar'  { $checked[$cursor] = -not $checked[$cursor] }
   }
-  Show-ToolCheckboxes
+  [System.Console]::SetCursorPosition(0, [System.Console]::CursorTop - ($n + 2))
+  Render-Tools
+}
+[System.Console]::CursorVisible = $true
+Write-Host ""
+
+$ToolSelected = @()
+for ($i = 0; $i -lt $n; $i++) {
+  if ($checked[$i]) { $ToolSelected += $AllToolKeys[$i] }
 }
 
 if ($ToolSelected.Count -eq 0) {
-  Write-Host ""
-  Write-Host "  Tidak ada AI tool dipilih — menggunakan .agents\skills\ sebagai default."
+  Write-Host "  Tidak ada provider dipilih — default ke .agents\skills\"
   $Selected += 'codex'
 } else {
-  Write-Host ""
   Write-Host "  Menyalin skills:"
   foreach ($Key in $ToolSelected) {
     switch ($Key) {
@@ -90,10 +106,15 @@ if ($ToolSelected.Count -eq 0) {
       'gemini'   { Copy-Skills ".gemini\skills";    $Selected += 'gemini';   Write-Host "  v Gemini CLI      -> .gemini\skills\" }
       'opencode' { Copy-Skills ".opencode\skill";   $Selected += 'opencode'; Write-Host "  v OpenCode        -> .opencode\skill\" }
       'kilo'     { Copy-Skills ".kilo\skills";      $Selected += 'kilo';     Write-Host "  v Kilo Code       -> .kilo\skills\" }
-      'codex'    { $Selected += 'codex'; Write-Host "  v Codex (OpenAI)  -> .agents\skills\ (native)" }
+      'codex'    { $Selected += 'codex'; Write-Host "  v Codex/OpenAI    -> .agents\skills\ (native)" }
       'kimi'     { $KimiDir = Join-Path $env:APPDATA "agents\skills"; Copy-Skills $KimiDir; $Selected += 'kimi'; Write-Host "  v Kimi CLI        -> $KimiDir" }
     }
   }
+}
+
+# Hapus .agents\skills\ kecuali jika codex dipilih
+if ($ToolSelected.Count -gt 0 -and $ToolSelected -notcontains 'codex') {
+  Remove-Item -Recurse -Force ".agents\skills" -ErrorAction SilentlyContinue
 }
 
 # ─── Save selected tools ───────────────────────────────────────────────────────
