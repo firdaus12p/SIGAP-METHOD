@@ -4,6 +4,8 @@
 
 > **Macca** berasal dari bahasa Bugis yang berarti *pintar, cerdas, pandai*. Dalam falsafah Bugis-Makassar, kepintaran selalu disandingkan dengan sifat-sifat luhur — identitas moral yang dibawa ke mana saja.
 
+![MACCA Method](image-macca-method.webp)
+
 ---
 
 ## Daftar Isi
@@ -291,7 +293,25 @@ curl -fsSL https://raw.githubusercontent.com/firdaus12p/macca-workflow/main/inst
 irm https://raw.githubusercontent.com/firdaus12p/macca-workflow/main/install.ps1 | iex
 ```
 
-Installer akan meminta nama developer di akhir proses (opsional, bisa dikosongkan).
+Installer akan menampilkan menu pilihan AI tool:
+
+```
+  Pilih AI tool yang kamu gunakan:
+  (ketik nomor, pisahkan spasi — contoh: 1 3 4)
+  (ketik 0 untuk pilih semua)
+
+  [1] GitHub Copilot       → .github/skills/
+  [2] Cursor               → .claude/skills/  (Claude Code compatible)
+  [3] Claude Code          → .claude/skills/
+  [4] Windsurf             → .windsurf/skills/
+  [5] Gemini CLI           → .gemini/skills/
+  [6] OpenCode             → .opencode/skill/
+  [7] Kilo Code            → .kilo/skills/
+  [8] Codex (OpenAI)       → .agents/skills/  (sudah ada)
+  [9] Kimi CLI             → ~/.config/agents/skills/
+```
+
+Kamu bisa memilih lebih dari satu tool (contoh: `1 3` untuk Copilot + Claude). Ketik `0` untuk install semua sekaligus. Installer juga menanyakan nama developer (opsional).
 
 ### Update ke Versi Terbaru
 
@@ -309,14 +329,18 @@ curl -fsSL https://raw.githubusercontent.com/firdaus12p/macca-workflow/main/upgr
 irm https://raw.githubusercontent.com/firdaus12p/macca-workflow/main/upgrade.ps1 | iex
 ```
 
-> `project-context/` dan `developer-config.json` kamu **tidak akan tersentuh** saat upgrade.
+> `project-context/` dan `developer-config.json` kamu **tidak akan tersentuh** saat upgrade. Skills di semua folder tool **diperbarui otomatis** sesuai pilihan saat install.
 
 ### Cara Memanggil Skill
 
-Di GitHub Copilot Chat (VS Code), ketik nama skill. Contoh:
+Ketik nama skill di chat tool AI kamu. Semua tool yang didukung mengenali skill secara native. Contoh:
 
 ```
 Gunakan skill brainstorm-prd untuk mulai project baru saya.
+```
+
+```
+Gunakan skill developer
 ```
 
 Atau panggil `help` untuk panduan interaktif:
@@ -332,7 +356,7 @@ Gunakan skill help
 ```
 your-project/
 ├── .agents/
-│   ├── skills/
+│   ├── skills/                  ← master skills (Codex native + source untuk semua tools)
 │   │   ├── brainstorm-prd/SKILL.md
 │   │   ├── brainstorm-architecture/SKILL.md
 │   │   ├── brainstorm-schema/SKILL.md
@@ -348,7 +372,17 @@ your-project/
 │   │   ├── add-feature/SKILL.md
 │   │   ├── spec-audit/SKILL.md
 │   │   └── spec-init/SKILL.md
-│   └── developer-config.json    ← konfigurasi nama developer (opsional)
+│   ├── developer-config.json    ← nama developer (opsional)
+│   └── macca-tools.txt          ← tools yang dipilih saat install
+│
+├── (dibuat otomatis sesuai tool yang dipilih saat install)
+│   ├── .github/skills/          ← GitHub Copilot
+│   ├── .claude/skills/          ← Claude Code + Cursor
+│   ├── .windsurf/skills/        ← Windsurf
+│   ├── .gemini/skills/          ← Gemini CLI
+│   ├── .opencode/skill/         ← OpenCode
+│   ├── .kilo/skills/            ← Kilo Code
+│   └── ~/.config/agents/skills/ ← Kimi CLI (global user-level)
 │
 ├── project-context/             ← dibuat otomatis oleh skill
 │   ├── PRD.md
@@ -362,7 +396,7 @@ your-project/
 │   └── plans/                   ← rencana kerja per fase (opsional)
 │       └── fase-1-setup-database.md
 │
-├── skills-lock.json             ← registry semua skill yang terinstal
+├── skills-lock.json
 └── ... (kode project kamu)
 ```
 
