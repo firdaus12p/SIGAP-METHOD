@@ -15,7 +15,14 @@ echo ""
 
 # ─── Clone & copy skills ────────────────────────────────────────────────────────
 echo "  Mengunduh skills..."
-git clone --depth 1 "$REPO_URL" "$TMP_DIR/macca" --quiet
+if ! git clone --depth 1 "$REPO_URL" "$TMP_DIR/macca" --quiet 2>&1; then
+  echo ""
+  echo "  ✗ Gagal mengunduh. Periksa:"
+  echo "    · Koneksi internet aktif"
+  echo "    · Repo tersedia di: $REPO_URL"
+  rm -rf "$TMP_DIR"
+  exit 1
+fi
 
 cp -r "$TMP_DIR/macca/.agents/" .
 cp "$TMP_DIR/macca/skills-lock.json" .
@@ -114,12 +121,14 @@ fi
 # ─── Save selected tools ───────────────────────────────────────────────────────────
 printf '%s\n' "${SELECTED[@]}" > .agents/macca-tools.txt
 
-# ─── Developer name ────────────────────────────────────────────────────────────────
+# ─── Nama developer & project ───────────────────────────────────────────────────────────────────────────────────
 echo ""
 read -r -p "  Kamu mau di panggil apa? (kosongkan untuk skip): " DEV_NAME </dev/tty
-if [ -n "$DEV_NAME" ]; then
-  printf '{\n  "name": "%s"\n}\n' "$DEV_NAME" > .agents/developer-config.json
-  echo "  Nama developer disimpan."
+read -r -p "  Nama project ini apa?    (kosongkan untuk skip): " PROJECT_NAME </dev/tty
+if [ -n "$DEV_NAME" ] || [ -n "$PROJECT_NAME" ]; then
+  printf '{\n  "name": "%s",\n  "project": "%s"\n}\n' "$DEV_NAME" "$PROJECT_NAME" > .agents/developer-config.json
+  [ -n "$DEV_NAME" ]     && echo "  Nama developer disimpan: $DEV_NAME"
+  [ -n "$PROJECT_NAME" ] && echo "  Nama project disimpan:   $PROJECT_NAME"
 fi
 
 # ─── Cleanup & done ────────────────────────────────────────────────────────────────

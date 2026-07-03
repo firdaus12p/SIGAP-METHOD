@@ -12,7 +12,15 @@ if (Test-Path ".agents\macca-tools.txt")        { $ToolsBackup  = Get-Content ".
 
 # ─── Update skills ─────────────────────────────────────────────────────────────
 if (Test-Path $TMP_DIR) { Remove-Item -Recurse -Force $TMP_DIR }
-git clone --depth 1 $REPO_URL $TMP_DIR --quiet
+git clone --depth 1 $REPO_URL $TMP_DIR --quiet 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) {
+  Write-Host ""
+  Write-Host "  x Gagal mengunduh. Periksa:"
+  Write-Host "    - Koneksi internet aktif"
+  Write-Host "    - Repo tersedia di: $REPO_URL"
+  if (Test-Path $TMP_DIR) { Remove-Item -Recurse -Force $TMP_DIR -ErrorAction SilentlyContinue }
+  exit 1
+}
 
 if (Test-Path ".agents") { Remove-Item -Recurse -Force ".agents" }
 Copy-Item -Recurse "$TMP_DIR\.agents" . -Force

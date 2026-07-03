@@ -14,7 +14,14 @@ TOOLS_BACKUP=""
 [ -f ".agents/macca-tools.txt" ] && TOOLS_BACKUP=$(cat ".agents/macca-tools.txt")
 
 # ─── Update skills ────────────────────────────────────────────────────────────
-git clone --depth 1 "$REPO_URL" "$TMP_DIR/macca" --quiet
+if ! git clone --depth 1 "$REPO_URL" "$TMP_DIR/macca" --quiet 2>&1; then
+  echo ""
+  echo "  ✗ Gagal mengunduh. Periksa:"
+  echo "    · Koneksi internet aktif"
+  echo "    · Repo tersedia di: $REPO_URL"
+  rm -rf "$TMP_DIR"
+  exit 1
+fi
 
 rm -rf .agents
 cp -r "$TMP_DIR/macca/.agents/" .

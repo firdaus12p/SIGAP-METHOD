@@ -13,7 +13,15 @@ Write-Host ""
 # ─── Clone & copy skills ───────────────────────────────────────────────────────
 Write-Host "  Mengunduh skills..."
 if (Test-Path $TMP_DIR) { Remove-Item -Recurse -Force $TMP_DIR }
-git clone --depth 1 $REPO_URL $TMP_DIR --quiet
+git clone --depth 1 $REPO_URL $TMP_DIR --quiet 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) {
+  Write-Host ""
+  Write-Host "  x Gagal mengunduh. Periksa:"
+  Write-Host "    - Koneksi internet aktif"
+  Write-Host "    - Repo tersedia di: $REPO_URL"
+  if (Test-Path $TMP_DIR) { Remove-Item -Recurse -Force $TMP_DIR -ErrorAction SilentlyContinue }
+  exit 1
+}
 
 Copy-Item -Recurse "$TMP_DIR\.agents" . -Force
 Copy-Item "$TMP_DIR\skills-lock.json" . -Force
@@ -112,12 +120,14 @@ foreach ($Num in $Choices) {
 # ─── Save selected tools ───────────────────────────────────────────────────────
 Set-Content ".agents\macca-tools.txt" ($Selected -join "`n")
 
-# ─── Developer name ────────────────────────────────────────────────────────────
+# ─── Nama developer & project ─────────────────────────────────────────────────
 Write-Host ""
-$DEV_NAME = Read-Host "  Kamu mau di panggil apa? (kosongkan untuk skip)"
-if ($DEV_NAME -ne "") {
-  Set-Content -Path ".agents\developer-config.json" -Value "{`n  `"name`": `"$DEV_NAME`"`n}"
-  Write-Host "  Nama developer disimpan."
+$DEV_NAME     = Read-Host "  Kamu mau di panggil apa? (kosongkan untuk skip)"
+$PROJECT_NAME = Read-Host "  Nama project ini apa?    (kosongkan untuk skip)"
+if ($DEV_NAME -ne "" -or $PROJECT_NAME -ne "") {
+  Set-Content -Path ".agents\developer-config.json" -Value "{`n  `"name`": `"$DEV_NAME`",`n  `"project`": `"$PROJECT_NAME`"`n}"
+  if ($DEV_NAME -ne "")     { Write-Host "  Nama developer disimpan: $DEV_NAME" }
+  if ($PROJECT_NAME -ne "") { Write-Host "  Nama project disimpan:   $PROJECT_NAME" }
 }
 
 # ─── Cleanup & done ────────────────────────────────────────────────────────────
