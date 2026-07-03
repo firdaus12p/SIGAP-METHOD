@@ -1,4 +1,4 @@
-$REPO_URL     = "https://github.com/firdaus12p/macca-workflow"
+$REPO_URL     = "https://github.com/firdaus12p/SIGAP---METHOD"
 $TMP_DIR      = Join-Path $env:TEMP "macca-install"
 $Selected     = @()
 $ClaudeCopied = $false
