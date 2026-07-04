@@ -8,7 +8,7 @@
 
 ---
 
-## Daftar Isi
+## Pilih yang ingin di baca
 
 1. [Masalah yang Diselesaikan](#1-masalah-yang-diselesaikan)
 2. [Cara Kerja](#2-cara-kerja)
