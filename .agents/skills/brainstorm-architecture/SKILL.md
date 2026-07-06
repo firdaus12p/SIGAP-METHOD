@@ -39,11 +39,25 @@ Skill ini digunakan untuk membantu user membuat **architecture.md** — dokumen 
 ## Cara Menggunakan Skill Ini
 
 1. Load skill ini setelah PRD selesai, atau ketika user ingin bahas arsitektur.
-2. Lakukan wawancara **satu per satu**.
-3. Setelah semua topik selesai, buat file `project-context/architecture.md` (buat folder `project-context/` jika belum ada)
+
+2. **Setup sesi sebelum memulai wawancara** — tanyakan dua hal ini terlebih dahulu:
+
+   **a. Mode pembahasan:**
+   > "Sesi ini ada **9 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"
+
+   Tunggu jawaban. Ikuti mode yang dipilih di seluruh sesi.
+
+   **b. Rekomendasi:**
+   > "Mau saya berikan **rekomendasi** untuk setiap topik berdasarkan riset terbaru?"
+
+   - Jika **ya** → sebelum setiap topik, gunakan subagent untuk riset mendalam tentang opsi terbaik saat ini (gunakan `context7` atau `exa` jika tersedia). Semua rekomendasi wajib berdasarkan hasil riset — bukan asumsi dari training data.
+   - Jika **tidak** → lanjut tanya tanpa rekomendasi.
+
+3. Lakukan wawancara sesuai mode yang dipilih. Tunggu jawaban sebelum lanjut.
+4. Setelah semua topik selesai, buat file `project-context/architecture.md` (buat folder `project-context/` jika belum ada)
 
    > ⚠️ **Jika file sudah ada:** tanya user sebelum menimpa — "(A) Timpa seluruhnya, (B) batalkan dan review dulu." Tunggu jawaban..
-4. Berikan ringkasan dan saran langkah selanjutnya.
+5. Berikan ringkasan dan saran langkah selanjutnya.
 
 ## Sesi Wawancara (9 Topik)
 
@@ -217,10 +231,12 @@ Jika user tidak punya ADR, bantu identifikasi dari jawaban topik 1-8 — mana ya
 ## Setelah architecture.md Dibuat
 
 1. Konfirmasi ke user bahwa `project-context/architecture.md` sudah berhasil dibuat.
-2. Sarankan langkah selanjutnya:
-   - *"Lanjut bikin schema.md (database)"*
-   - *"Lanjut bikin api.md (endpoints)"*
-   - *"Lanjut bikin rules.md (coding standards)"*
+2. Sarankan urutan langkah berikutnya (semua bisa diskip kecuali saat `spec-init`):
+   1. **`brainstorm-schema`** ← lanjut selanjutnya (database)
+   2. `brainstorm-api` — setelah schema selesai (endpoints)
+   3. `brainstorm-styleguide` — **opsional**, tanya user: *"Project ini punya UI? Mau definisikan style guide-nya?"*
+   4. `brainstorm-rules` — setelah api/styleguide (coding standards)
+   5. `brainstorm-task` — langkah terakhir (rencana kerja)
 
 ## Catatan Penting
 

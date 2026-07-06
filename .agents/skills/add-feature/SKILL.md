@@ -29,6 +29,7 @@ Kamu tidak bekerja dari nol — kamu membaca semua spec yang sudah ada terlebih 
 - Update SEMUA dokumen yang terdampak — tidak ada pengecualian
 - Tambahkan fase dan task baru ke Task.md
 - Serahkan ke `developer` untuk dikerjakan
+- Gunakan subagent kapan pun dibutuhkan — analisis dampak mendalam ke seluruh codebase atau riset pola implementasi
 
 ---
 

@@ -39,13 +39,26 @@ Skill ini digunakan untuk membantu user membuat **Product Requirements Document 
 ## Cara Menggunakan Skill Ini
 
 1. Ketika user mengatakan ingin membuat PRD, memulai project baru, atau brainstorming produk — load skill ini.
-2. Lakukan wawancara **satu per satu** (jangan tanya semua sekaligus).
-   - Tanyakan satu topik, tunggu jawaban user, lalu lanjut ke topik berikutnya.
+
+2. **Setup sesi sebelum memulai wawancara** — tanyakan dua hal ini terlebih dahulu:
+
+   **a. Mode pembahasan:**
+   > "Sesi ini ada **15 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"
+
+   Tunggu jawaban. Ikuti mode yang dipilih di seluruh sesi.
+
+   **b. Rekomendasi:**
+   > "Mau saya berikan **rekomendasi** untuk setiap topik berdasarkan riset terbaru?"
+
+   - Jika **ya** → sebelum setiap topik, gunakan subagent untuk riset mendalam tentang opsi terbaik saat ini (gunakan `context7` atau `exa` jika tersedia). Semua rekomendasi wajib berdasarkan hasil riset — bukan asumsi dari training data.
+   - Jika **tidak** → lanjut tanya tanpa rekomendasi.
+
+3. Lakukan wawancara sesuai mode yang dipilih. Tunggu jawaban user sebelum lanjut ke topik berikutnya.
    - Catat jawaban user secara informal dulu.
-3. Setelah semua topik selesai, buat file `project-context/PRD.md` (buat folder `project-context/` jika belum ada) dengan format di bawah.
+4. Setelah semua topik selesai, buat file `project-context/PRD.md` (buat folder `project-context/` jika belum ada) dengan format di bawah.
 
    > ⚠️ **Jika file sudah ada:** tanya user sebelum menimpa — "(A) Timpa seluruhnya, (B) batalkan dan review dulu." Tunggu jawaban.
-4. Berikan ringkasan dan saran langkah selanjutnya.
+5. Berikan ringkasan dan saran langkah selanjutnya.
 
 ## Sesi Wawancara (15 Topik)
 
@@ -260,12 +273,15 @@ Gali:
 
 1. Konfirmasi ke user bahwa `project-context/PRD.md` sudah berhasil dibuat.
 2. Berikan ringkasan singkat isi PRD (2-3 kalimat).
-3. Sarankan langkah selanjutnya:
-   - **Wajib berikutnya:** `brainstorm-architecture` — diperlukan sebelum schema dan api bisa dikerjakan.
-   - **Opsional (jika ada UI):** `brainstorm-styleguide` — bisa dikerjakan paralel dengan atau setelah architecture.
-   - **Opsional (kapan saja sebelum coding):** `brainstorm-rules`.
+3. Sarankan urutan langkah lengkap berikutnya (semua bisa diskip kecuali saat `spec-init`):
+   1. **`brainstorm-architecture`** ← wajib selanjutnya
+   2. `brainstorm-schema` — setelah architecture selesai
+   3. `brainstorm-api` — setelah schema selesai
+   4. `brainstorm-styleguide` — **opsional**, tanya user: *"Project ini punya UI? Mau definisikan style guide-nya?"*
+   5. `brainstorm-rules` — setelah api (atau styleguide jika ada)
+   6. `brainstorm-task` — langkah terakhir sebelum coding
 
-> **Catatan:** `schema.md` dan `api.md` membutuhkan `architecture.md` selesai lebih dulu — jangan tawarkan keduanya sebelum architecture selesai.
+> Setiap step bisa diskip oleh user. Selalu konfirmasi ke user sebelum lanjut ke step berikutnya.
 
 ## Catatan Penting
 

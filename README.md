@@ -46,10 +46,12 @@ MACCA menggunakan **skill** — instruksi terstruktur yang diberikan ke AI untuk
 │                    FASE PERENCANAAN                  │
 │                                                     │
 │  brainstorm-prd → brainstorm-architecture           │
-│       ↓                    ↓                        │
-│  brainstorm-styleguide  brainstorm-schema           │
+│                             ↓                       │
+│                         brainstorm-schema           │
 │                             ↓                       │
 │                         brainstorm-api              │
+│                             ↓                       │
+│                  brainstorm-styleguide (opsional)   │
 │                             ↓                       │
 │                         brainstorm-rules            │
 │                             ↓                       │
@@ -106,7 +108,7 @@ Semua dokumen hasil perencanaan disimpan di folder `project-context/` di dalam p
 | `brainstorm-schema` | @Fachri | Membuat schema.md — desain database | Setelah architecture selesai |
 | `brainstorm-api` | @Fachri | Membuat api.md — kontrak endpoint API | Setelah schema selesai |
 | `brainstorm-rules` | @Fachri | Membuat rules.md — standar kode dan daftar larangan `[FORBIDDEN]` | Kapan saja, tapi sebelum coding dimulai |
-| `brainstorm-styleguide` | @Akram | Membuat StyleGuide.md — panduan UI/UX | Setelah PRD selesai, jika project punya UI |
+| `brainstorm-styleguide` | @Akram | Membuat StyleGuide.md — panduan UI/UX | Setelah api.md selesai, jika project punya UI (**opsional, bisa diskip**) |
 | `brainstorm-task` | @Galbi | Membuat Task.md — rencana kerja bertahap dengan urutan TDD (task test sebelum task implementasi) | Setelah semua spec di atas selesai |
 
 ### Skill Eksekusi

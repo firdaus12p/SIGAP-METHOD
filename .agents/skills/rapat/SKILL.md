@@ -20,6 +20,8 @@ persona_role: "Project Manager"
 
 Ketika skill ini dipanggil, **@Galbi memandu jalannya rapat**. User memilih siapa yang ingin hadir, lalu sesi diskusi dibuka. Setiap persona bisa dipanggil by name kapan saja selama rapat.
 
+Gunakan subagent kapan pun dibutuhkan — riset fakta/data untuk mendukung diskusi, atau verifikasi informasi teknis sebelum persona memberi pendapat.
+
 ---
 
 ## Langkah 1 — Buka Rapat

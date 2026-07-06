@@ -47,6 +47,12 @@ Cek apakah `project-context/Task.md` sudah ada.
 - **Belum ada** → lanjutkan langkah di bawah (mode generate baru).
 - **Sudah ada** (biasanya dipanggil dari `add-feature`): masuk **Mode Tambah Fase** — lewati Sesi Klarifikasi topik 1 & 3 (sudah ditetapkan di Task.md lama), hanya tanyakan topik 2 (granularitas task baru), lalu **tambahkan fase/task baru di bawah konten yang ada** tanpa menimpa Task.md dari awal.
 
+**Setup sesi (tanyakan ini sebelum mulai klarifikasi):**
+> "Mau saya berikan **rekomendasi** untuk setiap pertanyaan berdasarkan best practice terbaru?"
+
+- Jika **ya** → gunakan subagent untuk riset pola task yang relevan dengan tech stack di `architecture.md` sebelum memberi rekomendasi. Semua rekomendasi wajib berdasarkan hasil riset — bukan asumsi dari training data.
+- Jika **tidak** → lanjut tanya tanpa rekomendasi.
+
 1. Sebelum mulai, **BACA semua dokumen spec** yang ada di folder `project-context/`:
    - `project-context/PRD.md` — fitur, business rules, acceptance criteria
    - `project-context/StyleGuide.md` — CSS framework, komponen, spacing (untuk task styling/setup UI)
@@ -96,7 +102,9 @@ Gali:
 **Jangan tanya user** — cek sendiri keberadaan file di folder `project-context/`:
 `project-context/PRD.md`, `project-context/architecture.md`, `project-context/schema.md`, `project-context/api.md`, `project-context/rules.md`, `project-context/StyleGuide.md`
 
-Jika ada dokumen yang belum ada, **beritahu user** (bukan bertanya):
+**`architecture.md` wajib ada** — jika tidak ada, **berhenti** dan minta user jalankan `brainstorm-architecture` terlebih dahulu. Task yang dibuat tanpa `architecture.md` tidak akan bisa dikerjakan oleh `developer`.
+
+Jika dokumen lain belum ada, **beritahu user** (bukan bertanya):
 > *"Saya cek dan `project-context/[nama file]` belum ada. Disarankan selesaikan dulu agar task lebih akurat. Lanjut generate berdasarkan dokumen yang tersedia?"*
 
 ## Deep Dive Analysis (Lakukan Sebelum Generate Task)

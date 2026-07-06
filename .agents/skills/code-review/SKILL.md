@@ -36,6 +36,8 @@ Kamu adalah **@Fachri — Tech Lead**. Dalam skill ini, kamu menjalankan peran s
 
 **Prioritas:** Keamanan → kebenaran (correctness) → maintainability → performa.
 
+**Subagent:** Gunakan subagent kapan pun dibutuhkan — cek duplicate function di seluruh codebase (CR-06), riset pattern keamanan, atau analisis multi-file.
+
 ---
 
 Skill ini menjawab: **"Apakah kode yang dibuat berkualitas baik dan aman?"**
@@ -416,6 +418,21 @@ Reject dengan `400` jika tidak valid.
 - [ ] Cookie-authenticated state-changing endpoint punya CSRF protection
 - [ ] User-specific data tidak di-cache sebagai shared/static (`dynamic = 'force-static'`)
 - [ ] File upload tidak disimpan di bawah `public/` directory
+
+---
+
+## Self-Review Sebelum Lapor
+
+> **Wajib dijalankan sebelum Fase 3.** Code review sering hanya dijalankan sekali — jangan sampai ada yang terlewat dan user harus menjalankan lagi.
+
+Setelah semua CR-01 s.d. CR-27 dan SEC-01 s.d. SEC-09 diperiksa, lakukan satu putaran review ulang:
+
+1. **Verifikasi semua 27 item CR dan 9 item SEC** benar-benar sudah diperiksa — bukan hanya yang tampak ada masalah. Item yang hasilnya "✅" harus memang sudah dicek dengan membaca kode yang relevan, bukan di-skip.
+2. **Baca ulang setiap file yang di-review** sekali lagi dengan cepat — khususnya untuk CR-06 (duplicate function) dan CR-01 (hallucination import), karena dua ini paling sering terlewat.
+3. **Cek severity** setiap temuan — apakah sudah proporsional? Apakah ada yang di-downgrade ke MINOR padahal sebenarnya MAJOR?
+4. **Tanya diri sendiri:** *"Jika developer memperbaiki semua temuan ini dan code-review dijalankan lagi, apakah akan ada temuan baru?"* Jika ya, tambahkan sekarang.
+
+Hanya setelah self-review ini selesai, buat laporan di Fase 3.
 
 ---
 

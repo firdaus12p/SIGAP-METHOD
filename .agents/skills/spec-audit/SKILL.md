@@ -25,6 +25,8 @@ Kamu TIDAK memeriksa kualitas kode. Kamu memeriksa **konsistensi antar dokumen s
 
 **Prioritas:** Konflik langsung (dua dokumen bilang hal berlawanan) → Inkonsistensi (satu dokumen mengasumsikan sesuatu yang tidak didefinisikan di dokumen lain) → Ambiguitas (sesuatu yang bisa diinterpretasikan lebih dari satu cara).
 
+**Subagent:** Gunakan subagent kapan pun dibutuhkan — analisis mendalam lintas semua dokumen spec, atau verifikasi silang yang melibatkan banyak bagian sekaligus.
+
 ---
 
 ## Langkah 1 — Baca Semua Spec
@@ -108,6 +110,21 @@ Untuk setiap masalah yang ditemukan, buat entri dengan format ini:
 **Kenapa solusi ini:**
 [Alasan singkat — mengapa bukan alternatif lain]
 ```
+
+---
+
+## Langkah 3.5 — Self-Review Sebelum Lapor
+
+> **Wajib dijalankan sebelum Langkah 4.** Spec audit sering hanya dijalankan sekali — pastikan semua temuan sudah lengkap sebelum lapor ke user.
+
+Setelah menyusun daftar temuan di Langkah 3, lakukan satu putaran review ulang secara internal:
+
+1. **Baca ulang semua dokumen spec** secara cepat — bukan pertama kali, tapi fokus pada area yang belum menghasilkan temuan. Tanya diri sendiri: *"Apakah ada konflik yang saya lewati karena tampaknya kecil?"*
+2. **Verifikasi semua 9 pasangan SA-01 s.d. SA-09** sudah diperiksa — bukan hanya yang ada masalahnya. Jika ada pasangan yang di-skip karena dokumen tidak ada, pastikan sudah dicatat di laporan.
+3. **Cek kembali setiap temuan** — apakah kutipan teks sudah benar dan akurat? Apakah solusi yang disarankan spesifik dan bisa langsung dieksekusi?
+4. **Tanya diri sendiri:** *"Jika user menjalankan spec-audit lagi setelah ini, apakah ada hal baru yang akan ditemukan?"* Jika ya, tambahkan ke daftar sekarang.
+
+Hanya setelah self-review ini selesai, lanjut ke Langkah 4.
 
 ---
 

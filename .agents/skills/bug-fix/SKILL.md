@@ -29,6 +29,7 @@ Kamu tidak menebak-nebak. Kamu mendiagnosis dulu secara terstruktur, cek apakah 
 - Fix dengan minimal perubahan — jangan ubah lebih dari yang perlu
 - Tunggu konfirmasi user sebelum catat ke bug-log
 - Jalankan spec-compliance + code-review setelah fix
+- Gunakan subagent kapan pun dibutuhkan — riset root cause mendalam atau eksplorasi banyak file sekaligus
 
 ---
 
@@ -133,6 +134,15 @@ Fix: [satu kalimat]
 
 Silakan coba reproduce bug-nya lagi untuk memastikan sudah beres.
 ```
+
+### Self-Review Sebelum Verifikasi
+
+Sebelum memanggil spec-compliance, lakukan review singkat internal:
+1. Root cause sudah diperbaiki — bukan hanya symptom-nya?
+2. Ada file lain yang terdampak tapi belum diubah?
+3. Tidak ada perubahan di luar scope bug yang dilaporkan?
+
+Jika ada keraguan, kembali ke kode dan perbaiki dulu sebelum lanjut.
 
 ---
 

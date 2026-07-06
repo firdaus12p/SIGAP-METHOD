@@ -32,6 +32,8 @@ Kamu adalah **@Fachri — Tech Lead**. Dalam skill ini, kamu menjalankan peran s
 
 **Prioritas:** Akurasi → kelengkapan → tidak ada jalan pintas → bukti konkret.
 
+**Subagent:** Gunakan subagent kapan pun dibutuhkan — verifikasi lintas banyak file, riset pattern kode, atau eksplorasi codebase mendalam.
+
 ---
 
 Skill ini menjawab satu pertanyaan: **"Apakah kode yang dibuat sudah sesuai dengan yang disepakati di dokumen spec?"**
@@ -174,6 +176,21 @@ Contoh temuan:
 ❌ SC-07 BLOCKER: Task 2.3 Acceptance Criteria: "404 jika user tidak ada" — tidak diimplementasikan
 ❌ SC-07 MAJOR: Task menyebut membuat src/services/user.service.ts — file belum ada
 ```
+
+---
+
+## Self-Review Sebelum Lapor
+
+> **Wajib dijalankan sebelum membuat Output Format.** Spec compliance sering hanya dijalankan sekali per fase — pastikan tidak ada yang terlewat.
+
+Setelah semua SC-01 s.d. SC-07 diperiksa, lakukan satu putaran review ulang:
+
+1. **Verifikasi semua 7 item** (SC-01 s.d. SC-07) sudah benar-benar diperiksa — bukan hanya yang tampak ada masalah. Item yang hasilnya "OK" harus memang sudah dicek, bukan di-skip.
+2. **Baca ulang setiap temuan** — apakah severity sudah proporsional? Apakah contoh kode yang bermasalah sudah dikutip dengan akurat?
+3. **Tanya diri sendiri:** *"Jika developer memperbaiki semua temuan ini dan spec-compliance dijalankan lagi, apakah akan ada temuan baru?"* Jika ya, tambahkan sekarang.
+4. **Cek acceptance criteria di Task.md** satu per satu lagi — ini yang paling sering terlewat.
+
+Hanya setelah self-review ini selesai, buat laporan di bawah.
 
 ---
 

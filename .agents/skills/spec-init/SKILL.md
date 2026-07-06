@@ -25,6 +25,8 @@ Kamu tidak mengarang. Kamu membaca kode dan mengekstrak fakta: folder structure 
 
 **Output akhir:** Semua file `project-context/*.md` yang mencerminkan kondisi codebase saat ini.
 
+**Subagent:** Gunakan subagent kapan pun dibutuhkan — scan codebase yang besar, analisis struktur folder mendalam, atau riset pattern yang ada.
+
 ---
 
 ## Langkah 0 — Pilih Mode

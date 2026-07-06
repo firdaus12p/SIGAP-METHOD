@@ -8,9 +8,9 @@ Write-Host "  Updating MACCA skills..."
 $ConfigBackup = $null
 $ToolsBackup  = $null
 if (Test-Path ".agents\developer-config.json") { $ConfigBackup = Get-Content ".agents\developer-config.json" -Raw }
-if (Test-Path ".agents\macca-tools.txt")        { $ToolsBackup  = Get-Content ".agents\macca-tools.txt"  -Raw }
+if (Test-Path ".agents\macca-tools.txt")        { $ToolsBackup  = Get-Content ".agents\macca-tools.txt" -Raw }
 
-# ─── Update skills ─────────────────────────────────────────────────────────────
+# ─── Clone repo ────────────────────────────────────────────────────────────────
 if (Test-Path $TMP_DIR) { Remove-Item -Recurse -Force $TMP_DIR }
 git clone --depth 1 $REPO_URL $TMP_DIR --quiet 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
@@ -22,48 +22,54 @@ if ($LASTEXITCODE -ne 0) {
   exit 1
 }
 
-if (Test-Path ".agents") { Remove-Item -Recurse -Force ".agents" }
-Copy-Item -Recurse "$TMP_DIR\.agents" . -Force
-Copy-Item "$TMP_DIR\skills-lock.json" . -Force
-
-# ─── Restore user configs ──────────────────────────────────────────────────────
-if ($null -ne $ConfigBackup) { Set-Content ".agents\developer-config.json" $ConfigBackup }
-if ($null -ne $ToolsBackup)  { Set-Content ".agents\macca-tools.txt"        $ToolsBackup  }
-
-# ─── Helper ────────────────────────────────────────────────────────────────────
-function Copy-Skills($Dest) {
+# ─── Helper: copy langsung dari temp ke folder tool ───────────────────────────
+function Copy-SkillsFromTemp($Dest) {
   New-Item -ItemType Directory -Force -Path $Dest | Out-Null
-  foreach ($Dir in (Get-ChildItem ".agents\skills" -Directory)) {
+  $SrcSkills = Join-Path $TMP_DIR ".agents\skills"
+  foreach ($Dir in (Get-ChildItem $SrcSkills -Directory)) {
     $Target = Join-Path $Dest $Dir.Name
     if (Test-Path $Target) { Remove-Item -Recurse -Force $Target }
     Copy-Item -Recurse $Dir.FullName $Target
   }
 }
 
-# ─── Re-copy updated skills to each tool's folder ─────────────────────────────
+# ─── Update skills langsung ke folder masing-masing tool ──────────────────────
+$HasCodex = $false
 if (Test-Path ".agents\macca-tools.txt") {
-  $Tools        = Get-Content ".agents\macca-tools.txt" | Where-Object { $_ -ne "" }
-  $ClaudeCopied = $false
+  $Tools = Get-Content ".agents\macca-tools.txt" | Where-Object { $_ -ne "" }
   Write-Host "  Memperbarui skills untuk:"
   foreach ($Tool in $Tools) {
     switch ($Tool) {
-      'copilot'  { Copy-Skills ".github\skills";   Write-Host "  v GitHub Copilot" }
-      'cursor'   { if (-not $ClaudeCopied) { Copy-Skills ".claude\skills"; $ClaudeCopied = $true }; Write-Host "  v Cursor" }
-      'claude'   { if (-not $ClaudeCopied) { Copy-Skills ".claude\skills"; $ClaudeCopied = $true }; Write-Host "  v Claude Code" }
-      'windsurf' { Copy-Skills ".windsurf\skills"; Write-Host "  v Windsurf" }
-      'gemini'   { Copy-Skills ".gemini\skills";   Write-Host "  v Gemini CLI" }
-      'opencode' { Copy-Skills ".opencode\skill";  Write-Host "  v OpenCode" }
-      'kilo'     { Copy-Skills ".kilo\skills";     Write-Host "  v Kilo Code" }
-      'codex'    { Write-Host "  v Codex (OpenAI) — .agents\skills\ adalah format native, tidak ada file tambahan" }
-      'kimi'     { Copy-Skills (Join-Path $env:APPDATA "agents\skills"); Write-Host "  v Kimi CLI" }
+      'copilot'  { Copy-SkillsFromTemp ".github\skills";   Write-Host "  v GitHub Copilot  -> .github\skills\" }
+      'cursor'   { Copy-SkillsFromTemp ".cursor\skills";   Write-Host "  v Cursor          -> .cursor\skills\" }
+      'claude'   { Copy-SkillsFromTemp ".claude\skills";   Write-Host "  v Claude Code     -> .claude\skills\" }
+      'windsurf' { Copy-SkillsFromTemp ".windsurf\skills"; Write-Host "  v Windsurf        -> .windsurf\skills\" }
+      'gemini'   { Copy-SkillsFromTemp ".gemini\skills";   Write-Host "  v Gemini CLI      -> .gemini\skills\" }
+      'opencode' { Copy-SkillsFromTemp ".opencode\skill";  Write-Host "  v OpenCode        -> .opencode\skill\" }
+      'kilo'     { Copy-SkillsFromTemp ".kilo\skills";     Write-Host "  v Kilo Code       -> .kilo\skills\" }
+      'codex'    { $HasCodex = $true; Copy-SkillsFromTemp ".agents\skills"; Write-Host "  v Codex (OpenAI)  -> .agents\skills\" }
+      'kimi'     { Copy-SkillsFromTemp (Join-Path $env:APPDATA "agents\skills"); Write-Host "  v Kimi CLI        -> AppData\agents\skills\" }
     }
   }
 } else {
-  Write-Host "  (Tidak ada macca-tools.txt - jalankan install ulang untuk pilih tools)"
+  Write-Host "  (macca-tools.txt tidak ditemukan - jalankan install ulang untuk memilih tools)"
 }
+
+# ─── Bersihkan .agents\skills\ jika bukan codex ───────────────────────────────
+if (-not $HasCodex -and (Test-Path ".agents\skills")) {
+  Remove-Item -Recurse -Force ".agents\skills"
+}
+
+# ─── Update skills-lock.json ──────────────────────────────────────────────────
+Copy-Item "$TMP_DIR\skills-lock.json" . -Force
+
+# ─── Restore user configs ─────────────────────────────────────────────────────
+New-Item -ItemType Directory -Force -Path ".agents" | Out-Null
+if ($null -ne $ConfigBackup) { Set-Content ".agents\developer-config.json" $ConfigBackup }
+if ($null -ne $ToolsBackup)  { Set-Content ".agents\macca-tools.txt"       $ToolsBackup  }
 
 # ─── Cleanup & done ────────────────────────────────────────────────────────────
 Remove-Item -Recurse -Force $TMP_DIR
 Write-Host ""
-Write-Host "  v MACCA updated to latest version."
+Write-Host "  v MACCA updated!"
 Write-Host ""
