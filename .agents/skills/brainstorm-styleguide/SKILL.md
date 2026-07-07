@@ -44,7 +44,7 @@ Skill ini digunakan untuk membantu user membuat **StyleGuide.md** melalui sesi w
    - `project-context/PRD.md` — platform target dan referensi UI yang sudah disebutkan.
    - `project-context/architecture.md` — tech stack frontend yang sudah dipilih.
 
-3. **Setup sesi** — tanyakan dua hal ini sebagai pembuka:
+3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **7 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"

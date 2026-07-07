@@ -44,7 +44,7 @@ Skill ini digunakan untuk membantu user membuat **schema.md** — dokumen yang m
    - `project-context/PRD.md` — fitur dan business rules yang menentukan tabel apa saja yang dibutuhkan.
    - `project-context/architecture.md` — tech stack, ORM, dan konvensi database yang dipilih.
 
-3. **Setup sesi** — tanyakan dua hal ini sebagai pembuka:
+3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **5 topik global** + sesi per tabel. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus untuk topik globalnya?"

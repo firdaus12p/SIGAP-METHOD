@@ -44,7 +44,7 @@ Skill ini digunakan untuk membuat **rules.md** — "konstitusi" kode yang membua
    - `project-context/architecture.md` — tech stack dan pola yang sudah ditetapkan.
    - `project-context/PRD.md` — platform dan constraint yang mempengaruhi standar kode.
 
-3. **Setup sesi** — tanyakan dua hal ini sebagai pembuka:
+3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **7 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"

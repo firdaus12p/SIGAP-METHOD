@@ -43,7 +43,7 @@ Skill ini digunakan untuk membantu user membuat **architecture.md** — dokumen 
 2. **Baca project-context yang ada** (sebelum interaksi apapun ke user):
    - `project-context/PRD.md` — baca fitur, target user, dan constraint yang mempengaruhi keputusan arsitektur.
 
-3. **Setup sesi** — tanyakan dua hal ini sebagai pembuka:
+3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **9 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"

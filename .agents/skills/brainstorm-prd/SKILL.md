@@ -43,7 +43,7 @@ Skill ini digunakan untuk membantu user membuat **Product Requirements Document 
 2. **Baca project-context yang ada** (sebelum interaksi apapun ke user):
    - Cek apakah `project-context/PRD.md` sudah ada — jika ada, baca isinya agar tidak tumpang tindih.
 
-3. **Setup sesi** — tanyakan dua hal ini sebagai pembuka:
+3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **15 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"

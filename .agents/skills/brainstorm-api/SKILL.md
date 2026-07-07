@@ -45,7 +45,7 @@ Skill ini digunakan untuk membantu user membuat **api.md** — dokumen kontrak A
    - `project-context/architecture.md` — tech stack dan pola API (REST/GraphQL/tRPC).
    - `project-context/schema.md` — tabel dan field yang tersedia untuk digunakan endpoint.
 
-3. **Setup sesi** — tanyakan dua hal ini sebagai pembuka:
+3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **5 topik global** + sesi per resource/endpoint. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus untuk topik globalnya?"
