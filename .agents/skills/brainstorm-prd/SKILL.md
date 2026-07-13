@@ -138,7 +138,7 @@ Gali:
 - Jika ada role berbeda (user biasa vs admin), bedakan alurnya
 - Skenario happy path vs error path
 
-### 7. Design & Tech Req
+### 7. Design & Tech Requirements
 Tanyakan: *"Platform apa yang dituju? Web, mobile, atau keduanya? Ada referensi desain atau tech stack yang diinginkan?"*
 
 Gali:
@@ -215,7 +215,7 @@ Gali:
 
 ## Konvensi ID Requirement
 
-Semua requirement yang bisa diturunkan ke desain, task, atau implementasi wajib punya ID stabil:
+Semua requirement yang bisa diturunkan ke desain, task, atau implementasi wajib punya `Traceability ID` yang stabil:
 
 - **FEAT-XX** → fitur utama / scope produk
 - **BR-XX** → business rule

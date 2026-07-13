@@ -8,7 +8,7 @@
 
 ---
 
-## Pilih yang ingin di baca
+## Daftar Isi
 
 1. [Masalah yang Diselesaikan](#1-masalah-yang-diselesaikan)
 2. [Cara Kerja](#2-cara-kerja)
@@ -71,8 +71,14 @@ Semua dokumen hasil perencanaan disimpan di folder `project-context/` di dalam p
 
 > **Kapan saja:** kamu bisa memanggil `rapat` di fase perencanaan maupun eksekusi jika butuh diskusi multi-persona sebelum lanjut.
 
-Mulai dari requirement utama, spec sebaiknya memakai ID stabil dan field traceability sederhana agar coverage ke schema, API, task, dan implementasi bisa diaudit dengan cepat.
-Untuk data yang bisa dibuat terstruktur, utamakan tabel, heading tetap, dan field eksplisit — jangan kembali ke prose bebas jika informasi itu perlu diaudit mesin maupun manusia.
+Jika diringkas, alurnya sederhana:
+- Tentukan kebutuhan produk lewat dokumen spec.
+- Turunkan spec menjadi task yang kecil dan bisa diverifikasi.
+- Kerjakan task secara bertahap.
+- Verifikasi hasilnya terhadap spec dan kualitas kode.
+
+Mulai dari requirement utama, spec sebaiknya memakai `Traceability ID` agar coverage ke schema, API, task, dan implementasi bisa diaudit dengan cepat.
+Untuk data yang bisa dibuat terstruktur, utamakan tabel, heading tetap, dan field eksplisit. Jangan kembali ke paragraf bebas jika informasi itu perlu dipindai mesin maupun diaudit manusia.
 
 ---
 
@@ -82,6 +88,7 @@ Untuk data yang bisa dibuat terstruktur, utamakan tabel, heading tetap, dan fiel
 |---|---|
 | **Skill** | Instruksi lengkap untuk AI agar melakukan tugas tertentu. Seperti "SOP" untuk AI. |
 | **Spec** / **Dokumen Spec** | Dokumen perencanaan project — berisi semua keputusan sebelum coding dimulai. |
+| **Subagent** | Agen bantu yang dipakai AI untuk eksplorasi, riset, atau analisis terfokus, lalu kembali dengan ringkasan singkat. |
 | **project-context/** | Folder tempat semua dokumen spec disimpan, di dalam project kamu. |
 | **PRD.md** | *Product Requirements Document* — daftar fitur, aturan bisnis, dan kriteria selesai. |
 | **architecture.md** | Keputusan teknis: bahasa pemrograman, framework, struktur folder, pola desain. |
@@ -92,7 +99,7 @@ Untuk data yang bisa dibuat terstruktur, utamakan tabel, heading tetap, dan fiel
 | **Task.md** | Rencana kerja bertahap: daftar semua tugas yang harus dikerjakan, dikelompokkan per fase. |
 | **Fase** | Kelompok task yang saling berkaitan, diselesaikan bersama. Contoh: "Fase 1: Setup Database". |
 | **Task** | Satuan pekerjaan terkecil yang bisa diselesaikan dalam satu sesi. |
-| **Traceability ID** | ID stabil seperti `FEAT-01`, `BR-02`, `API-03`, `DATA-01` yang dipakai untuk melacak requirement dari PRD sampai task dan implementasi. |
+| **Traceability ID** | Label stabil seperti `FEAT-01`, `BR-02`, `API-03`, `DATA-01` yang dipakai untuk melacak requirement dari PRD sampai task dan implementasi. |
 | **Acceptance Criteria** | Kondisi yang harus terpenuhi agar sebuah task dianggap selesai. Bisa dicek secara konkret. |
 | **Boilerplate** | Template atau starter code project yang sudah ada sebelum mulai coding dari nol. |
 | **spec-compliance** | Verifikasi bahwa kode sudah sesuai dengan dokumen spec. |
@@ -110,7 +117,7 @@ Gunakan prefix berikut secara konsisten di dokumen spec:
 | `FEAT-01` | Fitur utama di `PRD.md` |
 | `BR-01` | Business rule di `PRD.md` |
 | `NFR-01` | Non-functional requirement di `PRD.md` |
-| `AC-01` | Acceptance criteria di `PRD.md` |
+| `AC-01` | Acceptance Criteria di `PRD.md` |
 | `US-01` | User story di `PRD.md` |
 | `DATA-01` | Tabel atau entitas data di `schema.md` |
 | `API-01` | Endpoint atau kontrak API di `api.md` |
@@ -121,7 +128,15 @@ Aturan:
 - Jangan ubah ID lama hanya karena urutan konten berubah.
 - Item baru menambah ID baru; item lama mempertahankan ID lama.
 
-### 3c. developer-config.json Schema
+### 3c. Istilah Mode
+
+MACCA memakai istilah `mode` untuk konteks yang berbeda. Bedakan seperti ini:
+
+- **Mode pembahasan**: dipakai di skill `brainstorm-*` untuk memilih cara wawancara, misalnya `satu per satu` atau `per 3 topik`.
+- **Mode audit**: dipakai di `spec-audit`, yaitu `Project Audit` atau `Framework Audit`.
+- **Mode generate**: dipakai di `spec-init`, yaitu `Batch Generate` atau `Guided Generate`.
+
+### 3d. developer-config.json Schema
 
 File `.agents/developer-config.json` adalah konfigurasi bersama lintas skill. Field-field ini **boleh hidup berdampingan** dalam satu file:
 
@@ -129,6 +144,9 @@ File `.agents/developer-config.json` adalah konfigurasi bersama lintas skill. Fi
 {
   "name": "Nama user",
   "project": "Nama project",
+  "developerPreferences": {
+    "workMode": "direct"
+  },
   "brainstormPreferences": {
     "discussionMode": "one-by-one",
     "recommendations": true
@@ -147,6 +165,10 @@ Aturan penulisan:
 - Semua skill yang mengubah file ini harus **merge dengan isi yang sudah ada**, bukan menimpa seluruh file.
 - Field yang tidak dikenali skill tetap harus dipertahankan.
 
+Catatan:
+- `developerPreferences.workMode` dipakai oleh skill `developer` untuk mengingat pilihan mode kerja (`direct` atau `plan-first`).
+- Begitu dipilih sekali, mode ini dipakai terus di sesi berikutnya sampai kamu meminta perubahan.
+
 ---
 
 ## 4. Daftar Skill
@@ -160,14 +182,14 @@ Aturan penulisan:
 | `brainstorm-schema` | @Fachri | Membuat schema.md — desain database | Setelah architecture selesai |
 | `brainstorm-api` | @Fachri | Membuat api.md — kontrak endpoint API | Setelah schema selesai |
 | `brainstorm-rules` | @Fachri | Membuat rules.md — standar kode dan daftar larangan `[FORBIDDEN]` | Kapan saja, tapi sebelum coding dimulai |
-| `brainstorm-styleguide` | @Akram | Membuat StyleGuide.md — panduan UI/UX | Setelah api.md selesai, jika project punya UI (**opsional, bisa diskip**) |
+| `brainstorm-styleguide` | @Akram | Membuat StyleGuide.md — panduan desain UI/UX | Setelah api.md selesai, jika project punya UI (**opsional, bisa diskip**) |
 | `brainstorm-task` | @Galbi | Membuat Task.md — rencana kerja bertahap dengan urutan TDD (task test sebelum task implementasi) | Setelah semua spec di atas selesai |
 
 ### Skill Eksekusi
 
 | Skill | Persona | Fungsi | Kapan Digunakan |
 |---|---|---|---|
-| `developer` | @Firdaus | Mengerjakan task dari Task.md dengan pendekatan TDD — test ditulis sebelum implementasi, tiap task divalidasi sempit, dan `[SELF-REVIEW]` ditulis setelah tiap task | Setelah Task.md ada dan siap dikerjakan |
+| `developer` | @Firdaus | Mengerjakan task dari Task.md dengan pendekatan TDD — test ditulis sebelum implementasi, tiap task divalidasi sempit, `[SELF-REVIEW]` ditulis setelah tiap task, dan mode kerja bisa diingat antar sesi | Setelah Task.md ada dan siap dikerjakan |
 | `spec-compliance` | @Fachri | Verifikasi kode terhadap semua dokumen spec | Otomatis setelah setiap fase di developer |
 | `code-review` | @Fachri | Cek kualitas dan keamanan kode (27 item) | Setelah spec-compliance bersih |
 
@@ -179,7 +201,7 @@ Aturan penulisan:
 | `bug-fix` | @Ikhsan | Diagnosis, perbaikan, dokumentasi bug, dan regression prevention | Saat ada bug yang perlu diperbaiki |
 | `add-feature` | @Galbi | Tambah fitur baru ke project yang sudah berjalan | Setelah project berjalan dan ada fitur baru |
 | `spec-audit` | @Fachri | Cek konsistensi antar dokumen spec project atau antar instruksi framework MACCA itu sendiri | Setelah beberapa/semua spec selesai, sebelum coding, atau saat ingin merapikan MACCA |
-| `spec-init` | @Fachri | Buat semua spec dari codebase yang sudah ada, lengkap dengan confidence summary per dokumen | Untuk project yang sudah berjalan tapi belum punya spec |
+| `spec-init` | @Fachri | Buat semua spec dari codebase yang sudah ada, lengkap dengan `Confidence Summary` per dokumen | Untuk project yang sudah berjalan tapi belum punya spec |
 | `rapat` | @Galbi | Diskusi tim multi-persona dalam satu sesi, dengan handoff keputusan ke artefak spec | Kapan saja, saat butuh perspektif dari beberapa keahlian sekaligus |
 
 > `spec-audit` punya dua mode: **mode project** untuk audit `project-context/`, dan **mode framework** untuk audit README + skill docs MACCA.
@@ -397,21 +419,27 @@ irm https://raw.githubusercontent.com/firdaus12p/MACCA-METHOD/main/upgrade.ps1 |
 
 ### Cara Memanggil Skill
 
-Ketik nama skill di chat tool AI kamu. Semua tool yang didukung mengenali skill secara native. Contoh:
+Ketik nama skill di chat tool AI kamu. Semua tool yang didukung mengenali skill secara native.
+
+Pola paling aman dan paling konsisten adalah:
 
 ```
 Gunakan skill brainstorm-prd untuk mulai project baru saya.
 ```
 
+Contoh lain:
+
 ```
 Gunakan skill developer
 ```
 
-Atau panggil `help` untuk panduan interaktif:
+Kalau belum yakin harus mulai dari mana, panggil `help`:
 
 ```
 Gunakan skill help
 ```
+
+Kalau ingin konsisten, cukup gunakan frasa **"Gunakan skill [nama-skill]"** untuk semua skill.
 
 ---
 
@@ -423,6 +451,7 @@ Contoh struktur setelah install dengan GitHub Copilot dipilih:
 your-project/
 ├── .agents/
 │   ├── developer-config.json    ← nama developer, nama project, dan preferensi brainstorm (opsional)
+│   │                              juga menyimpan mode kerja developer jika dipilih
 │   └── macca-tools.txt          ← tools yang dipilih saat install
 │
 ├── .github/
@@ -495,6 +524,10 @@ Bisa. Itulah kenapa ada `spec-compliance` (cek kode vs spec) dan `code-review` (
 **Q: Apakah semua dokumen punya `Confidence Summary`?**
 
 Tidak. `Confidence Summary` adalah output default dari `spec-init`, karena skill itu mengekstrak fakta dan inferensi dari codebase yang sudah ada. Skill `brainstorm-*` biasanya tidak memerlukannya karena isinya dibangun langsung lewat wawancara dan konfirmasi user.
+
+**Q: Apakah saya harus memilih mode kerja `developer` setiap sesi?**
+
+Tidak. Setelah kamu memilih sekali antara mode `direct` atau `plan-first`, pilihan itu disimpan di `.agents/developer-config.json` dan akan dipakai terus di sesi berikutnya. Jika ingin ganti, cukup bilang saat memulai sesi dan AI akan memperbarui preferensinya.
 
 **Q: Bagaimana jika saya tidak mengerti istilah teknis?**
 

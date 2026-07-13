@@ -63,7 +63,7 @@ Baca semua dokumen berikut yang tersedia di folder `project-context/`:
 
 Baca semua yang tersedia — jangan skip satupun.
 
-Selain memahami isinya, catat juga pola ID yang sudah dipakai jika dokumen-dokumen itu sudah memiliki ID stabil seperti `FEAT-*`, `BR-*`, `NFR-*`, `DATA-*`, `API-*`, atau `TASK-*`.
+Selain memahami isinya, catat juga pola ID yang sudah dipakai jika dokumen-dokumen itu sudah memiliki `Traceability ID` seperti `FEAT-*`, `BR-*`, `NFR-*`, `DATA-*`, `API-*`, atau `TASK-*`.
 
 ---
 

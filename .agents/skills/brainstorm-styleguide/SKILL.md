@@ -1,6 +1,6 @@
 ---
 name: brainstorm-styleguide
-description: Skill untuk mewawancarai user dan menghasilkan StyleGuide.md (Panduan Desain & UI/UX). Gunakan setelah PRD selesai atau ketika user ingin mendefinisikan tampilan aplikasi.
+description: Skill untuk mewawancarai user dan menghasilkan StyleGuide.md (Panduan Desain UI/UX). Gunakan setelah PRD selesai atau ketika user ingin mendefinisikan tampilan aplikasi.
 license: MIT
 persona: "Akram"
 persona_role: "UI/UX Designer"
@@ -97,7 +97,7 @@ Gali:
 - Utility-first atau component-based?
 
 ### 2. Color Palette
-Tanyakan: *"Skema warna yang diinginkan? Sebutkan warna utama, sekunder, dan lainnya."*
+Tanyakan: *"Skema warna yang diinginkan? Sebutkan warna utama, sekunder, aksen, dan warna status jika ada."*
 
 Gali:
 - Warna primary (utama)
@@ -128,7 +128,7 @@ Gali:
 - Gap antar section di halaman
 
 ### 5. Component Styles
-Tanyakan: *"Gaya komponen seperti tombol, card, input, dan lainnya? Ada preferensi bentuk dan bayangan?"*
+Tanyakan: *"Gaya komponen seperti tombol, card, input, atau komponen penting lain? Ada preferensi bentuk dan bayangan?"*
 
 Gali:
 - Bentuk sudut (rounded-sm, rounded-md, rounded-full, atau kotak)

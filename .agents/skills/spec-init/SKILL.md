@@ -25,7 +25,7 @@ Kamu tidak mengarang. Kamu membaca kode dan mengekstrak fakta: folder structure 
 
 **Output akhir:** Semua file `project-context/*.md` yang mencerminkan kondisi codebase saat ini.
 
-Setiap klaim yang kamu tulis harus punya **confidence level**:
+Setiap klaim yang kamu tulis harus punya **tingkat keyakinan**:
 - **Tinggi** — terlihat langsung di kode, config, manifest, migration, atau file yang eksplisit
 - **Sedang** — inferensi kuat dari pola usage, penamaan, atau struktur project
 - **Rendah** — dugaan lemah; jangan diperlakukan sebagai fakta, wajib ditandai untuk verifikasi user
@@ -98,7 +98,7 @@ PRD.md           ← disimpulkan dari semua di atas (terakhir, bukan tebakan)
 
 ---
 
-## Confidence Levels (Wajib)
+## Tingkat Keyakinan (Wajib)
 
 Setiap dokumen yang dihasilkan wajib menyertakan `## Confidence Summary` di bagian akhir.
 
@@ -114,7 +114,7 @@ Format minimumnya:
 > ⚠️ Perlu verifikasi: [pertanyaan atau dugaan yang belum bisa dibuktikan langsung]
 ```
 
-Aturan confidence:
+Aturan tingkat keyakinan:
 - Jangan beri label **Tinggi** kalau bukti langsungnya tidak ada
 - Untuk klaim **Sedang**, jelaskan basis inferensinya secara singkat
 - Untuk klaim **Rendah**, tulis sebagai pertanyaan atau catatan verifikasi, bukan fakta final

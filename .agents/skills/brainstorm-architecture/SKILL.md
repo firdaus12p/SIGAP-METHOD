@@ -96,7 +96,7 @@ Gali:
 - Apa yang masuk (input) dan keluar (output) dari sistem ini
 
 ### 2. Tech Stack
-Tanyakan: *"Tech stack apa yang mau dipakai? Frontend, Backend, Database, dan lainnya?"*
+Tanyakan: *"Tech stack apa yang mau dipakai? Frontend, backend, database, dan komponen pendukung lain seperti hosting atau CI/CD?"*
 
 Gali:
 - Frontend: framework & versi (Next.js, React, Vue, dll)
