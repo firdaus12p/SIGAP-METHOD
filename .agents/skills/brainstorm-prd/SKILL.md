@@ -43,7 +43,26 @@ Skill ini digunakan untuk membantu user membuat **Product Requirements Document 
 2. **Baca project-context yang ada** (sebelum interaksi apapun ke user):
    - Cek apakah `project-context/PRD.md` sudah ada — jika ada, baca isinya agar tidak tumpang tindih.
 
-3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
+3. **Setup sesi** — sebelum bertanya, cek `.agents/developer-config.json` untuk field berikut:
+
+    ```json
+    {
+       "brainstormPreferences": {
+          "discussionMode": "one-by-one" | "three-at-a-time",
+          "recommendations": true | false
+       }
+    }
+    ```
+
+    - Jika file belum ada, buat nanti setelah user menjawab.
+    - Jika preferensi sudah ada, tampilkan konfirmasi singkat:
+       > "Saya menemukan preferensi sesi tersimpan:
+       > - Mode pembahasan: [satu per satu / per 3 topik]
+       > - Rekomendasi: [ya / tidak]
+       > Gunakan seperti ini, atau mau override untuk sesi ini?"
+    - Jika user setuju, pakai preferensi itu dan **jangan ulangi dua pertanyaan setup**.
+    - Jika user override, pakai jawaban baru lalu update `.agents/developer-config.json` sambil mempertahankan field lain.
+    - Jika preferensi belum ada, lanjut tanya dua hal berikut lalu simpan jawabannya ke `.agents/developer-config.json` untuk sesi berikutnya.
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **15 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"
@@ -194,6 +213,18 @@ Gali:
 - Keputusan yang ditunda
 - Risiko yang perlu diwaspadai
 
+## Konvensi ID Requirement
+
+Semua requirement yang bisa diturunkan ke desain, task, atau implementasi wajib punya ID stabil:
+
+- **FEAT-XX** → fitur utama / scope produk
+- **BR-XX** → business rule
+- **NFR-XX** → non-functional requirement
+- **AC-XX** → acceptance criteria
+- **US-XX** → user story
+
+Jika PRD diupdate di masa depan, **jangan acak ulang ID lama**. Tambahkan ID baru secara berurutan agar traceability antar dokumen tetap stabil.
+
 ## Format Output PRD.md
 
 ```markdown
@@ -216,16 +247,16 @@ Gali:
 
 ## 4. Main Feature
 ### MVP (Rilis Pertama)
-| # | Fitur | Deskripsi | Prioritas |
-|---|-------|-----------|-----------|
-| 1 | [Fitur] | [Deskripsi] | Tinggi |
+| ID | Fitur | Deskripsi | Prioritas |
+|----|-------|-----------|-----------|
+| FEAT-01 | [Fitur] | [Deskripsi] | Tinggi |
 
 ### Future Enhancement
-- [Fitur] — [Deskripsi]
+- **FEAT-F01:** [Fitur] — [Deskripsi]
 
 ## 5. Business Rules
-- **[Aturan 1]:** [Penjelasan]
-- **[Aturan 2]:** [Penjelasan]
+- **BR-01:** [Penjelasan]
+- **BR-02:** [Penjelasan]
 
 ## 6. User Flow
 ### [Persona 1]
@@ -239,20 +270,20 @@ Gali:
 - **Integrasi:** [Pihak ketiga]
 
 ## 8. Non-Functional Requirements
-| Kategori | Requirement | Target |
-|----------|-------------|--------|
-| Performa | Waktu loading halaman | < 3 detik |
-| Keamanan | [requirement] | [target] |
-| Skalabilitas | Concurrent users | [angka] |
-| Aksesibilitas | [requirement] | [target] |
+| ID | Kategori | Requirement | Target |
+|----|----------|-------------|--------|
+| NFR-01 | Performa | Waktu loading halaman | < 3 detik |
+| NFR-02 | Keamanan | [requirement] | [target] |
+| NFR-03 | Skalabilitas | Concurrent users | [angka] |
+| NFR-04 | Aksesibilitas | [requirement] | [target] |
 
 ## 9. Success Criteria (Bare Minimum)
 - [ ] [Kriteria 1]
 - [ ] [Kriteria 2]
 
 ## 10. Acceptance Criteria
-### [Nama Fitur]
-- **Given** [kondisi awal], **When** [aksi user], **Then** [hasil yang diharapkan]
+### FEAT-01: [Nama Fitur]
+- **AC-01:** **Given** [kondisi awal], **When** [aksi user], **Then** [hasil yang diharapkan]
 
 ## 11. Non-Goals / Out of Scope
 - [Apa yang TIDAK akan dikerjakan]
@@ -262,7 +293,7 @@ Gali:
 - [Asumsi 2]
 
 ## 13. User Stories
-- Sebagai **[role]**, saya ingin **[fitur]** agar **[manfaat]**
+- **US-01:** Sebagai **[role]**, saya ingin **[fitur]** agar **[manfaat]**
 
 ## 14. Stakeholders
 | Nama/Role | Tanggung Jawab |

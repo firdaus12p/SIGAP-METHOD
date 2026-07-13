@@ -45,7 +45,26 @@ Skill ini digunakan untuk membantu user membuat **api.md** — dokumen kontrak A
    - `project-context/architecture.md` — tech stack dan pola API (REST/GraphQL/tRPC).
    - `project-context/schema.md` — tabel dan field yang tersedia untuk digunakan endpoint.
 
-3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
+3. **Setup sesi** — sebelum bertanya, cek `.agents/developer-config.json` untuk field berikut:
+
+   ```json
+   {
+     "brainstormPreferences": {
+       "discussionMode": "one-by-one" | "three-at-a-time",
+       "recommendations": true | false
+     }
+   }
+   ```
+
+   - Jika file belum ada, buat nanti setelah user menjawab.
+   - Jika preferensi sudah ada, tampilkan konfirmasi singkat:
+     > "Saya menemukan preferensi sesi tersimpan:
+     > - Mode pembahasan: [satu per satu / per 3 topik]
+     > - Rekomendasi: [ya / tidak]
+     > Gunakan seperti ini, atau mau override untuk sesi ini?"
+   - Jika user setuju, pakai preferensi itu dan **jangan ulangi dua pertanyaan setup**.
+   - Jika user override, pakai jawaban baru lalu update `.agents/developer-config.json` sambil mempertahankan field lain.
+   - Jika preferensi belum ada, lanjut tanya dua hal berikut lalu simpan jawabannya ke `.agents/developer-config.json` untuk sesi berikutnya.
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **5 topik global** + sesi per resource/endpoint. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus untuk topik globalnya?"
@@ -76,6 +95,8 @@ Gali:
 - Base URL per environment (dev: `http://localhost:3000/api/v1`, prod: `https://api.domain.com/v1`)
 - Strategi versioning (URI path `/v1/`, atau header `api-version`)
 - Header autentikasi (Bearer token, Cookie, API Key)
+- Jika auth pakai cookie/session: apakah endpoint yang mengubah state butuh CSRF protection?
+- Masa berlaku token/session, refresh, rotation, dan logout behavior
 - Format respons standar (contoh wrapper: `{ success, data, message, meta }`)
 
 ### 2. Error Catalog
@@ -101,6 +122,7 @@ Gali per resource. Untuk setiap resource tanyakan:
 - Standard CRUD mana yang dibutuhkan: `GET /` (list), `GET /:id`, `POST /`, `PUT /:id`, `PATCH /:id`, `DELETE /:id`
 - Endpoint non-CRUD (misal: `POST /auth/login`, `POST /auth/refresh`, `POST /orders/:id/cancel`)
 - Endpoint yang butuh autentikasi vs yang public
+- Aturan authorization/ownership per endpoint (role apa yang boleh, apakah hanya pemilik resource yang bisa akses)
 
 ### 4. Request & Response Detail
 Tanyakan: *"Untuk setiap endpoint, apa data yang dikirim dan data yang diterima? Termasuk contoh nyatanya."*
@@ -110,9 +132,10 @@ Gali per endpoint:
 - **Response sukses:** Schema + contoh JSON nyata
 - **Response error:** Schema per kode error yang relevan
 - Field constraint (wajib/opsional, tipe, validasi)
+- Security notes bila relevan: CSRF, idempotency key, signed webhook, upload restriction, ownership check
 
-### 5. Pagination, Filtering & Rate Limiting
-Tanyakan: *"Untuk endpoint yang mengembalikan daftar data, bagaimana cara paginasi dan filternya?"*
+### 5. Pagination, Filtering, Rate Limiting & Abuse Protection
+Tanyakan: *"Untuk endpoint yang mengembalikan daftar data, bagaimana cara paginasi dan filternya? Dan endpoint sensitif dilindungi seperti apa?"*
 
 Gali:
 - **Paginasi:** Offset-based (`?page=1&limit=20`) atau cursor-based (`?after=cursor_id`)?
@@ -120,6 +143,8 @@ Gali:
 - **Filtering:** Query params untuk filter (misal: `?status=active&category=books`)
 - **Sorting:** `?sort=created_at&order=desc`
 - **Rate Limiting:** Ada limit per menit/jam? Response header apa yang dipakai?
+- Endpoint sensitif mana yang butuh proteksi tambahan (login, reset password, upload, webhook, pembayaran)
+- Idempotency / replay protection perlu di endpoint mana
 
 ## Format Output api.md
 
@@ -142,6 +167,13 @@ Gali:
 - **Header:** `Authorization: Bearer <token>`
 - **Token Endpoint:** `POST /auth/login`
 - **Refresh Endpoint:** `POST /auth/refresh`
+
+## Security Controls
+- **CSRF Protection:** [Ya/Tidak/Tidak relevan — jelaskan kapan diterapkan]
+- **Ownership / Authorization Rule:** [ringkasan aturan akses resource]
+- **Sensitive Endpoints:** [login / reset password / upload / webhook / pembayaran / admin action]
+- **Idempotency / Replay Protection:** [endpoint yang membutuhkan dan caranya]
+- **Webhook Verification / Signature:** [jika ada integrasi webhook]
 
 ## Format Respons Standar
 ```json
@@ -194,10 +226,12 @@ Gali:
 ---
 
 ## Resource: [Nama Resource]
+**Trace to:** [FEAT-01 / AC-01]
 
-### GET /[resource]
+### API-01 — GET /[resource]
 **Deskripsi:** Ambil daftar [resource]
 **Auth:** [Required / Public]
+**Authorization:** [role / ownership rule]
 
 **Query Params:**
 | Param | Tipe | Default | Keterangan |
@@ -217,9 +251,10 @@ Gali:
 
 ---
 
-### POST /[resource]
+### API-02 — POST /[resource]
 **Deskripsi:** Buat [resource] baru
 **Auth:** Required
+**Authorization:** [role / ownership rule]
 
 **Request Body:**
 ```json
@@ -239,6 +274,8 @@ Gali:
 
 **Error yang Mungkin:** `400` (validasi), `409` (duplikat), `401` (belum login)
 
+**Security Notes:** [CSRF / idempotency / upload restriction / ownership check / tidak ada]
+
 ---
 
 *[ulangi untuk setiap endpoint]*
@@ -254,7 +291,7 @@ Gali:
 
 ## Catatan Penting
 
-- **Error Catalog (topik 2) adalah seksi yang paling sering hilang** — jangan skip. Tanpa ini AI tidak akan generate error handling yang benar di client.
+- **Error Catalog (topik 2) dan kontrol abuse/security (topik 5) adalah seksi yang paling sering hilang** — jangan skip.
 - Tanya per resource, jangan semua endpoint sekaligus.
 - Selalu minta contoh JSON nyata — bukan hanya tipe data. AI infer structure dari contoh.
 - Jika user bingung, bantu usulkan endpoint standar CRUD berdasarkan tabel di schema.md.

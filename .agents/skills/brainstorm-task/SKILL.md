@@ -48,6 +48,24 @@ Cek apakah `project-context/Task.md` sudah ada.
 - **Sudah ada** (biasanya dipanggil dari `add-feature`): masuk **Mode Tambah Fase** — lewati Sesi Klarifikasi topik 1 & 3 (sudah ditetapkan di Task.md lama), hanya tanyakan topik 2 (granularitas task baru), lalu **tambahkan fase/task baru di bawah konten yang ada** tanpa menimpa Task.md dari awal.
 
 **Setup sesi (tanyakan ini sebelum mulai klarifikasi):**
+
+Sebelum bertanya, cek `.agents/developer-config.json` untuk field berikut:
+
+```json
+{
+  "brainstormPreferences": {
+    "recommendations": true | false
+  }
+}
+```
+
+- Jika file belum ada, buat nanti setelah user menjawab.
+- Jika preferensi sudah ada, tampilkan konfirmasi singkat:
+  > "Saya menemukan preferensi sesi tersimpan untuk rekomendasi: [ya / tidak]. Gunakan seperti ini, atau mau override untuk sesi ini?"
+- Jika user setuju, pakai preferensi itu dan **jangan ulangi pertanyaan setup**.
+- Jika user override, pakai jawaban baru lalu update `.agents/developer-config.json` sambil mempertahankan field lain.
+- Jika preferensi belum ada, tanya seperti biasa lalu simpan jawabannya ke `.agents/developer-config.json` untuk sesi berikutnya.
+
 > "Mau saya berikan **rekomendasi** untuk setiap pertanyaan berdasarkan best practice terbaru?"
 
 - Jika **ya** → untuk setiap pertanyaan: gunakan subagent untuk riset pola task yang relevan dengan tech stack di `architecture.md` terlebih dahulu (gunakan `context7` atau `exa` jika tersedia), lalu ajukan pertanyaan **beserta rekomendasi** berdasarkan hasil riset. User bisa terima atau berikan jawaban sendiri. Rekomendasi wajib dari hasil riset — bukan dari training data.
@@ -119,6 +137,8 @@ Sebelum menulis Task.md, lakukan analisis internal:
 6. **Baca `project-context/rules.md`** → standar kode → ada task setup ESLint, Prettier, tsconfig?
 7. Identifikasi dependensi antar task (database harus ada sebelum model, model sebelum service, service sebelum controller)
 8. **TDD:** Setiap task implementasi (service, endpoint, komponen) harus didahului task test dalam urutan task. Format: Task N.1 = tulis test, Task N.2 = implementasi (dengan dependensi: N.1 harus selesai dulu).
+9. Jika `architecture.md`, `schema.md`, `api.md`, atau `rules.md` menyebut kontrol keamanan, turunkan menjadi task eksplisit — misal: auth guard, ownership check, input validation, secure cookie/session config, rate limiting, CSRF protection, audit logging, masking/retention. Jangan asumsikan kontrol ini akan "ikut terpasang sendiri".
+10. Bangun **traceability matrix**: setiap requirement penting (`FEAT-*`, `BR-*`, `NFR-*`, `API-*`, `DATA-*`) harus punya minimal satu task yang merujuk ke ID tersebut.
 
 Setelah analisis selesai, **tampilkan ringkasan ke user sebelum generate Task.md**:
 
@@ -132,6 +152,10 @@ Fitur yang perlu diimplementasikan:
 Estimasi fase:
 - Fase 1: [nama] ([N] task)
 - Fase 2: [nama] ([N] task)
+
+Kontrol keamanan yang perlu diimplementasikan:
+- [kontrol keamanan 1]
+- [kontrol keamanan 2]
 
 Apakah scope ini sudah sesuai? Ada yang perlu ditambah atau dikurangi?
 ```
@@ -170,6 +194,7 @@ Tunggu konfirmasi user sebelum generate Task.md.
   - **File:** `[path/file yang dibuat atau dimodifikasi]`
   - **Deskripsi:** [Penjelasan singkat apa yang dikerjakan]
   - **Referensi:** [`project-context/architecture.md#2` / `project-context/rules.md#7`]
+  - **Traceability IDs:** [`FEAT-01` / `BR-01` / `API-01` / `DATA-01`]
   - **Acceptance Criteria:**
     - [ ] [Kondisi testable 1]
     - [ ] [Kondisi testable 2]
@@ -179,6 +204,7 @@ Tunggu konfirmasi user sebelum generate Task.md.
   - **Deskripsi:** [Penjelasan singkat]
   - **Dependensi:** Task 1.1 harus selesai
   - **Referensi:** [`project-context/schema.md#users`]
+  - **Traceability IDs:** [`FEAT-01` / `DATA-01`]
   - **Acceptance Criteria:**
     - [ ] [Kondisi testable]
 
@@ -192,8 +218,19 @@ Tunggu konfirmasi user sebelum generate Task.md.
   - **File:** `[path/file]`
   - **Deskripsi:** [Penjelasan singkat]
   - **Referensi:** [`project-context/api.md#auth`]
+  - **Traceability IDs:** [`FEAT-01` / `API-01` / `NFR-02`]
   - **Acceptance Criteria:**
     - [ ] [Kondisi testable]
+
+---
+
+## Traceability Matrix
+| Requirement ID | Sumber | Task yang Menutupinya |
+|----------------|--------|-----------------------|
+| FEAT-01 | `project-context/PRD.md` | `Task 1.1`, `Task 1.2`, `Task 2.1` |
+| BR-01 | `project-context/PRD.md` | `Task 1.1` |
+| API-01 | `project-context/api.md` | `Task 2.1` |
+| DATA-01 | `project-context/schema.md` | `Task 1.2` |
 ```
 
 ## Setelah Task.md Dibuat
@@ -209,6 +246,9 @@ Tunggu konfirmasi user sebelum generate Task.md.
 - Setiap task harus memiliki **acceptance criteria yang testable** — bukan hanya deskripsi.
 - Tandai **dependensi antar task** dengan jelas — AI tidak boleh loncat task.
 - **TDD:** Setiap task implementasi wajib didahului task test. Task N.1 = tulis test, Task N.2 = tulis implementasi. Dependensi N.2 → N.1 harus dinyatakan eksplisit.
+- Jika spec menyebut kontrol keamanan, buat task keamanan itu secara eksplisit — jangan dibiarkan implisit di kepala AI.
+- Setiap task wajib punya **Traceability IDs** yang merujuk ke requirement atau artefak upstream yang nyata.
+- `Traceability Matrix` wajib dihasilkan agar coverage requirement bisa diaudit cepat.
 - Granularitas task harus **atomik** — bisa dikerjakan dan diverifikasi dalam satu sesi.
 - Gunakan referensi ke dokumen lain (`project-context/schema.md#tabel`, `project-context/api.md#endpoint`) di setiap task.
 - Gunakan Bahasa Indonesia.

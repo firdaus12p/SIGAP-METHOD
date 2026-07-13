@@ -443,7 +443,7 @@ Hanya setelah self-review ini selesai, buat laporan di Fase 3.
 ```markdown
 ## Code Review Report
 
-**Task:** [nama task]
+**Task/Fase:** [nama task atau nama fase]
 **Scope:** [file yang direview]
 **Status:** [💥 BLOCKER | 🔴 MAJOR | ⚠️ MINOR | ✅ LULUS]
 

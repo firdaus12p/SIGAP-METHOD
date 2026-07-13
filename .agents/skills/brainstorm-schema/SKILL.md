@@ -44,7 +44,26 @@ Skill ini digunakan untuk membantu user membuat **schema.md** — dokumen yang m
    - `project-context/PRD.md` — fitur dan business rules yang menentukan tabel apa saja yang dibutuhkan.
    - `project-context/architecture.md` — tech stack, ORM, dan konvensi database yang dipilih.
 
-3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
+3. **Setup sesi** — sebelum bertanya, cek `.agents/developer-config.json` untuk field berikut:
+
+    ```json
+    {
+       "brainstormPreferences": {
+          "discussionMode": "one-by-one" | "three-at-a-time",
+          "recommendations": true | false
+       }
+    }
+    ```
+
+    - Jika file belum ada, buat nanti setelah user menjawab.
+    - Jika preferensi sudah ada, tampilkan konfirmasi singkat:
+       > "Saya menemukan preferensi sesi tersimpan:
+       > - Mode pembahasan: [satu per satu / per 3 topik]
+       > - Rekomendasi: [ya / tidak]
+       > Gunakan seperti ini, atau mau override untuk sesi ini?"
+    - Jika user setuju, pakai preferensi itu dan **jangan ulangi dua pertanyaan setup**.
+    - Jika user override, pakai jawaban baru lalu update `.agents/developer-config.json` sambil mempertahankan field lain.
+    - Jika preferensi belum ada, lanjut tanya dua hal berikut lalu simpan jawabannya ke `.agents/developer-config.json` untuk sesi berikutnya.
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **5 topik global** + sesi per tabel. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus untuk topik globalnya?"
@@ -79,6 +98,7 @@ Gali:
 - **Audit fields:** Apakah semua tabel punya `created_at`, `updated_at`? Di-set oleh DB trigger atau aplikasi?
 - **Soft delete:** Apakah pakai `deleted_at` (soft delete) atau langsung hapus (hard delete)?
 - **Timestamps:** Timezone UTC atau local?
+- **Retention / deletion rule:** Data disimpan berapa lama? Ada anonymization atau archival untuk data sensitif?
 
 ### 2. Daftar Tabel
 Tanyakan: *"Tabel atau collection apa saja yang diperlukan di database?"*
@@ -95,6 +115,7 @@ Gali satu tabel per pertanyaan:
 - Nama kolom dan tipe data (VARCHAR, INTEGER, UUID, TEXT, BOOLEAN, TIMESTAMP, DECIMAL, ENUM, JSONB)
 - Constraints per kolom (NOT NULL, UNIQUE, DEFAULT, PRIMARY KEY)
 - Kolom mana yang berisi data sensitif / PII (nama, email, nomor telepon, dll)?
+- Untuk kolom sensitif: perlu hash, encrypt, mask, atau cukup plain text?
 - Apakah ada kolom yang intentionally denormalized (duplikasi data yang disengaja)?
 
 ### 4. Relasi Antar Tabel
@@ -126,12 +147,16 @@ Gali:
 - **Audit Fields:** `created_at`, `updated_at` ada di **semua tabel**, di-set oleh [aplikasi / DB trigger]
 - **Soft Delete:** [Ya — pakai kolom `deleted_at` / Tidak — hard delete]
 - **Timezone:** UTC
+- **Retention / Deletion:** [berapa lama data disimpan, kapan dihapus, kapan dianonimkan/diarsipkan]
 
 ---
 
-## Tabel: `[nama_tabel]`
+## Tabel DATA-01: `[nama_tabel]`
 > [Deskripsi singkat tabel ini untuk apa]
+> **Trace to:** [FEAT-01 / BR-01]
 > **PII:** [Ya — berisi data pribadi / Tidak]
+> **Proteksi Data:** [hash / encrypt / mask / tidak perlu]
+> **Retention:** [berapa lama disimpan / kapan dihapus atau diarsipkan]
 
 | Kolom | Tipe | Nullable | Default | Constraint | Keterangan |
 |-------|------|----------|---------|------------|------------|
@@ -149,8 +174,9 @@ Gali:
 
 ---
 
-## Tabel: `[nama_tabel_2]`
+## Tabel DATA-02: `[nama_tabel_2]`
 > [Deskripsi]
+> **Trace to:** [FEAT-01 / BR-02]
 > **PII:** [Ya / Tidak]
 
 | Kolom | Tipe | Nullable | Default | Constraint | Keterangan |
@@ -169,6 +195,11 @@ Gali:
 | Tabel | Kolom Duplikat | Alasan |
 |-------|----------------|--------|
 | [tabel] | [kolom] | [Mengapa diduplikasi — misal: untuk histori order] |
+
+## Data Protection & Retention
+| Tabel/Kolom | Kategori | Proteksi | Retention | Catatan |
+|-------------|----------|----------|-----------|---------|
+| [users.email] | PII | [encrypt/mask/plain] | [retention rule] | [catatan] |
 ```
 
 ## Setelah schema.md Dibuat
@@ -184,6 +215,6 @@ Gali:
 
 - Tanya satu tabel per pertanyaan, jangan semua tabel sekaligus.
 - **Konvensi global (topik 1) HARUS ditanya pertama** — ini fundasi semua tabel.
-- Kolom PII (topik 3) sangat penting untuk compliance dan keamanan — tandai dengan jelas.
+- Kolom PII dan retention rule (topik 1 & 3) sangat penting untuk compliance dan keamanan — tandai dengan jelas.
 - Jika user belum punya gambaran tabel, bantu usulkan berdasarkan fitur di PRD dan User Stories.
 - Gunakan Bahasa Indonesia.

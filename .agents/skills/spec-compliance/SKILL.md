@@ -59,6 +59,7 @@ Skill ini menjawab satu pertanyaan: **"Apakah kode yang dibuat sudah sesuai deng
 - [ ] Acceptance Criteria per fitur terpenuhi (Given/When/Then dari `PRD.md § Acceptance Criteria`)
 - [ ] Tidak ada fitur dari `PRD.md § Non-Goals` yang ikut diimplementasikan
 - [ ] NFR dipertimbangkan: performa, keamanan, aksesibilitas sesuai `PRD.md § Non-Functional Requirements`
+- [ ] Jika PRD memakai ID requirement (`FEAT-*`, `BR-*`, `NFR-*`, `AC-*`), implementasi fase ini bisa ditelusuri ke ID yang relevan via `Task.md`
 
 ```
 Contoh temuan:
@@ -96,6 +97,7 @@ Contoh temuan:
 - [ ] Soft delete diikuti — jika pakai `deleted_at`, jangan pakai hard delete (`model.delete()`)
 - [ ] Audit fields ada: `created_at`, `updated_at` di model yang seharusnya
 - [ ] Kolom PII ditangani dengan aman (tidak di-log, tidak di-expose ke response)
+- [ ] Jika tabel punya `Trace to`, penggunaan model/query selaras dengan requirement yang dirujuk
 
 ```
 Contoh temuan:
@@ -116,6 +118,7 @@ Contoh temuan:
 - [ ] Error codes menggunakan kode yang terdaftar di `api.md § Error Catalog`
 - [ ] Pagination diimplementasikan sesuai pola di `api.md § Pagination`
 - [ ] Auth header ada dan benar sesuai `api.md § Autentikasi`
+- [ ] Jika endpoint punya `API-*` atau `Trace to`, implementasi route/handler sesuai dengan requirement yang dirujuk
 
 ```
 Contoh temuan:
@@ -144,7 +147,7 @@ Contoh temuan:
 ---
 
 ## [SC-06] StyleGuide Compliance
-**Baca:** `project-context/StyleGuide.md` *(hanya untuk kode UI/frontend)*
+**Baca:** `project-context/StyleGuide.md` *(jika ada, dan hanya untuk kode UI/frontend)*
 
 - [ ] CSS framework sesuai `StyleGuide.md § CSS Framework` — tidak campur Tailwind dan Bootstrap
 - [ ] Warna menggunakan token yang terdefinisi — tidak ada hardcoded hex di luar daftar
@@ -170,6 +173,7 @@ Contoh temuan:
 - [ ] Semua Acceptance Criteria di task ini terpenuhi — cek satu per satu
 - [ ] Dokumen yang direferensikan di task sudah dikonsultasi (`schema.md#users`, dll.)
 - [ ] Task tidak setengah jalan — tidak ada bagian yang dikerjakan tapi belum selesai
+- [ ] Jika task punya `Traceability IDs`, semua ID itu valid dan mengarah ke artefak upstream yang nyata
 
 ```
 Contoh temuan:
@@ -196,10 +200,12 @@ Hanya setelah self-review ini selesai, buat laporan di bawah.
 
 ## Output Format
 
+Laporan ini **ditampilkan di chat pada sesi saat ini**. Jangan simpan ke file terpisah kecuali user secara eksplisit meminta artefak report. Secara default, report ini bersifat ephemeral dan dipakai sebagai gate sebelum lanjut ke `code-review`.
+
 ```markdown
 ## Spec Compliance Report
 
-**Task:** [nama task]
+**Task/Fase:** [nama task atau nama fase]
 **Scope:** [file-file yang direview]
 **Status:** [✅ LULUS | ⚠️ ADA MINOR | 🔴 ADA MAJOR | 💥 ADA BLOCKER]
 

@@ -43,10 +43,29 @@ Skill ini digunakan untuk membantu user membuat **architecture.md** — dokumen 
 2. **Baca project-context yang ada** (sebelum interaksi apapun ke user):
    - `project-context/PRD.md` — baca fitur, target user, dan constraint yang mempengaruhi keputusan arsitektur.
 
-3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
+3. **Setup sesi** — sebelum bertanya, cek `.agents/developer-config.json` untuk field berikut:
+
+    ```json
+    {
+       "brainstormPreferences": {
+          "discussionMode": "one-by-one" | "three-at-a-time",
+          "recommendations": true | false
+       }
+    }
+    ```
+
+    - Jika file belum ada, buat nanti setelah user menjawab.
+    - Jika preferensi sudah ada, tampilkan konfirmasi singkat:
+       > "Saya menemukan preferensi sesi tersimpan:
+       > - Mode pembahasan: [satu per satu / per 3 topik]
+       > - Rekomendasi: [ya / tidak]
+       > Gunakan seperti ini, atau mau override untuk sesi ini?"
+    - Jika user setuju, pakai preferensi itu dan **jangan ulangi dua pertanyaan setup**.
+    - Jika user override, pakai jawaban baru lalu update `.agents/developer-config.json` sambil mempertahankan field lain.
+    - Jika preferensi belum ada, lanjut tanya dua hal berikut lalu simpan jawabannya ke `.agents/developer-config.json` untuk sesi berikutnya.
 
    **a. Mode pembahasan:**
-   > "Sesi ini ada **9 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"
+   > "Sesi ini ada **10 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"
 
    Tunggu jawaban. Ikuti mode yang dipilih di seluruh sesi.
 
@@ -62,7 +81,7 @@ Skill ini digunakan untuk membantu user membuat **architecture.md** — dokumen 
    > ⚠️ **Jika file sudah ada:** tanya user sebelum menimpa — "(A) Timpa seluruhnya, (B) batalkan dan review dulu." Tunggu jawaban..
 6. Berikan ringkasan dan saran langkah selanjutnya.
 
-## Sesi Wawancara (9 Topik)
+## Sesi Wawancara (10 Topik)
 
 > **Mode riset aktif** (jika setup sesi 3b = ya): untuk setiap topik berikut — riset dulu → lalu tanya beserta rekomendasi. Ulangi pola ini untuk setiap topik.
 
@@ -130,7 +149,17 @@ Gali:
 - Apakah butuh RBAC (Role-Based Access Control)?
 - Di mana token disimpan? (httpOnly cookie vs localStorage — rekomendasi: httpOnly)
 
-### 8. Deployment & Infrastructure
+### 8. Security & Abuse Cases
+Tanyakan: *"Sebelum lanjut ke deployment, apa data sensitif dan abuse case utama yang perlu kita antisipasi dari level arsitektur?"*
+
+Gali:
+- Data sensitif apa saja yang disimpan atau diproses (PII, token, dokumen, payment reference, dll.)
+- Aksi kritis apa yang perlu proteksi ekstra (login, reset password, pembayaran, upload file, admin actions)
+- Abuse case yang paling mungkin: brute force, spam, IDOR, privilege escalation, CSRF, replay request, webhook forgery, file upload abuse
+- Kontrol mitigasi yang diinginkan sejak awal: rate limiting, ownership checks, CSRF protection, audit log, token/session expiry, signed webhook, object storage policy, malware scan, dsb.
+- Kapan security event perlu dicatat ke audit log
+
+### 9. Deployment & Infrastructure
 Tanyakan: *"Aplikasi ini akan di-deploy dimana? Ada lingkungan staging/production yang terpisah?"*
 
 Gali:
@@ -140,7 +169,7 @@ Gali:
 - Domain dan SSL
 - Apakah butuh CDN atau object storage (S3, Cloudflare R2)?
 
-### 9. Architecture Decision Records (ADR)
+### 10. Architecture Decision Records (ADR)
 Tanyakan: *"Ada keputusan arsitektural penting yang alasannya perlu dicatat? Misal: kenapa pakai PostgreSQL bukan MongoDB?"*
 
 Gali:
@@ -148,7 +177,7 @@ Gali:
 - Keputusan pola/struktur yang mungkin terlihat aneh tapi ada alasannya
 - Trade-off yang sudah dipertimbangkan
 
-Jika user tidak punya ADR, bantu identifikasi dari jawaban topik 1-8 — mana yang butuh penjelasan alasan.
+Jika user tidak punya ADR, bantu identifikasi dari jawaban topik 1-9 — mana yang butuh penjelasan alasan.
 
 ## Format Output architecture.md
 
@@ -210,14 +239,23 @@ Jika user tidak punya ADR, bantu identifikasi dari jawaban topik 1-8 — mana ya
 - **RBAC:** [Ya / Tidak]
 - **Roles:** [daftar role dan hak akses]
 
-## 8. Deployment & Infrastructure
+## 8. Security & Abuse Cases
+- **Data Sensitif:** [daftar data sensitif utama]
+- **Aksi Kritis:** [login / reset password / admin action / upload / pembayaran / dll]
+- **Abuse Cases Utama:**
+   - [Brute force / spam / IDOR / CSRF / privilege escalation / replay / upload abuse]
+- **Kontrol Wajib:**
+   - [Rate limiting / ownership check / CSRF protection / audit log / signed webhook / secure session expiry]
+- **Audit Logging:** [event apa saja yang harus dicatat]
+
+## 9. Deployment & Infrastructure
 - **Platform:** [Vercel / Railway / Docker+VPS / dll]
 - **Environments:** development → staging → production
 - **CI/CD:** [GitHub Actions / dll]
 - **CDN / Storage:** [Cloudflare / S3 / dll]
 - **Domain:** [domain plan]
 
-## 9. Architecture Decision Records (ADR)
+## 10. Architecture Decision Records (ADR)
 
 ### ADR-001: [Judul Keputusan]
 - **Konteks:** [Situasi yang menyebabkan keputusan ini]
@@ -247,7 +285,8 @@ Jika user tidak punya ADR, bantu identifikasi dari jawaban topik 1-8 — mana ya
 ## Catatan Penting
 
 - System Context (topik 1) adalah level tertinggi — mulai dari sini sebelum detail teknis.
-- ADR (topik 9) sangat penting: tanpa ADR, AI akan propose reversal keputusan yang sudah matang.
+- Threat model ringan (topik 8) wajib dibahas sebelum implementasi agar keputusan keamanan tidak terlambat.
+- ADR (topik 10) sangat penting: tanpa ADR, AI akan propose reversal keputusan yang sudah matang.
 - Tanya satu per satu.
 - Jika user belum punya preferensi tech stack, rekomendasikan berdasarkan kebutuhan di PRD.
 - Gunakan Bahasa Indonesia.

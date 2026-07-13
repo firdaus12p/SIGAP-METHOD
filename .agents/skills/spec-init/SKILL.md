@@ -1,6 +1,6 @@
 ---
 name: spec-init
-description: Skill untuk menghasilkan semua dokumen project-context/ dari codebase yang sudah ada. Bisa dijalankan dalam mode Batch (semua sekaligus) atau mode Terpandu (satu per satu dengan konfirmasi). Cocok untuk project yang sudah berjalan atau boilerplate.
+description: Skill untuk menghasilkan semua dokumen project-context/ dari codebase yang sudah ada. Bisa dijalankan dalam mode Batch Generate (semua sekaligus) atau Guided Generate (satu per satu dengan konfirmasi). Cocok untuk project yang sudah berjalan atau boilerplate.
 license: MIT
 persona: "Fachri"
 persona_role: "Tech Lead"
@@ -25,6 +25,11 @@ Kamu tidak mengarang. Kamu membaca kode dan mengekstrak fakta: folder structure 
 
 **Output akhir:** Semua file `project-context/*.md` yang mencerminkan kondisi codebase saat ini.
 
+Setiap klaim yang kamu tulis harus punya **confidence level**:
+- **Tinggi** — terlihat langsung di kode, config, manifest, migration, atau file yang eksplisit
+- **Sedang** — inferensi kuat dari pola usage, penamaan, atau struktur project
+- **Rendah** — dugaan lemah; jangan diperlakukan sebagai fakta, wajib ditandai untuk verifikasi user
+
 **Subagent:** Gunakan subagent kapan pun dibutuhkan — scan codebase yang besar, analisis struktur folder mendalam, atau riset pattern yang ada.
 
 ---
@@ -36,12 +41,12 @@ Tanya user sebelum memulai:
 ```
 Ada dua cara menjalankan spec-init:
 
-Mode A — Batch (semua sekaligus)
+Mode A — Batch Generate (semua sekaligus)
   Saya akan baca seluruh codebase dan langsung hasilkan semua dokumen spec.
   Cocok untuk: project kecil-menengah, atau kamu ingin cepat selesai.
   Risiko: untuk project besar, beberapa detail mungkin terlewat.
 
-Mode B — Terpandu (satu per satu)
+Mode B — Guided Generate (satu per satu)
   Saya hasilkan satu dokumen, kamu review dan koreksi, baru lanjut ke berikutnya.
   Cocok untuk: project besar, atau kamu ingin hasil yang akurat.
   Lebih lambat, tapi hasilnya lebih bisa diandalkan.
@@ -67,6 +72,8 @@ Dari sini kamu sudah bisa menentukan:
 - Folder mana yang berisi model, routes, komponen, dll.
 - Skala project (kecil / menengah / besar)
 
+Selama membaca, pisahkan terus antara **observasi langsung** dan **inferensi**. Jangan gabungkan keduanya seolah sama kuat.
+
 ---
 
 ## Langkah 2 — Urutan Generate
@@ -91,13 +98,39 @@ PRD.md           ← disimpulkan dari semua di atas (terakhir, bukan tebakan)
 
 ---
 
-## Mode A — Batch
+## Confidence Levels (Wajib)
+
+Setiap dokumen yang dihasilkan wajib menyertakan `## Confidence Summary` di bagian akhir.
+
+Format minimumnya:
+
+```markdown
+## Confidence Summary
+
+- **Tinggi:** [daftar temuan yang terlihat langsung di code/config]
+- **Sedang:** [daftar temuan yang disimpulkan kuat dari struktur/pola]
+- **Rendah:** [daftar hal yang masih perlu konfirmasi user]
+
+> ⚠️ Perlu verifikasi: [pertanyaan atau dugaan yang belum bisa dibuktikan langsung]
+```
+
+Aturan confidence:
+- Jangan beri label **Tinggi** kalau bukti langsungnya tidak ada
+- Untuk klaim **Sedang**, jelaskan basis inferensinya secara singkat
+- Untuk klaim **Rendah**, tulis sebagai pertanyaan atau catatan verifikasi, bukan fakta final
+- `PRD.md` biasanya punya confidence paling campuran karena disimpulkan terakhir dari artefak lain
+
+---
+
+## Mode A — Batch Generate
 
 Baca semua file yang relevan sesuai urutan di Langkah 2, lalu hasilkan semua dokumen sekaligus.
 
+Setiap dokumen yang dihasilkan wajib memuat `## Confidence Summary`.
+
 Setelah selesai:
 ```
-spec-init selesai (Mode Batch).
+spec-init selesai (Mode Batch Generate).
 
 Dokumen yang dihasilkan:
 - ✅ project-context/architecture.md
@@ -107,22 +140,30 @@ Dokumen yang dihasilkan:
 - ✅ project-context/StyleGuide.md  (atau: ⬜ dilewati — tidak ada UI)
 - ✅ project-context/PRD.md
 
+Semua dokumen di atas sudah dilengkapi `Confidence Summary`.
+
 Langkah selanjutnya:
-1. Review setiap dokumen — koreksi jika ada yang tidak akurat
+1. Review setiap dokumen — koreksi jika ada yang tidak akurat, terutama item confidence **Sedang** dan **Rendah**
 2. Jalankan `spec-audit` untuk cek konsistensi antar dokumen
 3. Jalankan `brainstorm-task` untuk membuat Task.md
 ```
 
 ---
 
-## Mode B — Terpandu
+## Mode B — Guided Generate
 
 Jalankan setiap dokumen satu per satu mengikuti urutan di Langkah 2. Setelah setiap dokumen selesai:
 
 ```
 [Nama dokumen] sudah selesai dan disimpan ke project-context/[nama].md.
 
+Confidence Summary:
+- Tinggi: [ringkasan]
+- Sedang: [ringkasan]
+- Rendah: [ringkasan]
+
 Silakan review. Jika ada yang tidak akurat, beritahu saya dan saya akan koreksi.
+Fokus utama review: item confidence **Sedang** dan **Rendah**.
 
 Kalau sudah oke, ketik "lanjut" untuk lanjut ke [dokumen berikutnya].
 ```
@@ -167,13 +208,16 @@ Langkah selanjutnya:
 ### PRD.md
 **Jangan baca file baru** — simpulkan dari dokumen yang sudah dihasilkan sebelumnya
 **Ekstrak:** fitur apa yang sudah dibangun (dari api+schema), business rules yang terlihat dari schema constraints, non-goals yang terlihat dari apa yang *tidak* ada
+**Confidence note:** `PRD.md` hampir selalu mengandung campuran **Tinggi** dan **Sedang**. Jangan menulis tujuan bisnis atau motivasi user sebagai fakta pasti jika tidak terlihat eksplisit di artefak repo.
 
 ---
 
 ## Aturan
 
 1. **Dokumentasikan yang ada, bukan yang seharusnya** — jika kode melanggar best practice, catat apa adanya di spec, bukan versi ideal
-2. **Jika tidak yakin, tulis sebagai catatan** — gunakan `> ⚠️ Perlu verifikasi: [pertanyaan]` bukan mengarang
-3. **PRD selalu terakhir** — PRD disimpulkan dari fakta yang sudah terkumpul
-4. **Task.md bukan output skill ini** — arahkan ke `brainstorm-task` setelah spec selesai
-5. **Mode B: tunggu konfirmasi sebelum lanjut** — jangan generate dokumen berikutnya tanpa "lanjut" dari user
+2. **Pisahkan fakta dari inferensi** — setiap klaim harus jelas apakah itu `Tinggi`, `Sedang`, atau `Rendah`
+3. **Jika tidak yakin, tulis sebagai catatan** — gunakan `> ⚠️ Perlu verifikasi: [pertanyaan]` bukan mengarang
+4. **Setiap dokumen wajib punya `Confidence Summary`** — jangan skip, termasuk di mode Batch Generate
+5. **PRD selalu terakhir** — PRD disimpulkan dari fakta yang sudah terkumpul
+6. **Task.md bukan output skill ini** — arahkan ke `brainstorm-task` setelah spec selesai
+7. **Mode B: tunggu konfirmasi sebelum lanjut** — jangan generate dokumen berikutnya tanpa "lanjut" dari user

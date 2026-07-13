@@ -20,6 +20,8 @@ persona_role: "Project Manager"
 
 Ketika skill ini dipanggil, **@Galbi memandu jalannya rapat**. User memilih siapa yang ingin hadir, lalu sesi diskusi dibuka. Setiap persona bisa dipanggil by name kapan saja selama rapat.
 
+Rapat tetap **bukan skill eksekusi**, tetapi hasil rapat **tidak boleh berhenti di chat**. Jika ada keputusan yang sudah cukup matang, rapat harus menutup sesi dengan **handoff artefak** yang jelas: dokumen mana yang perlu diupdate, apa isi perubahannya, dan skill lanjutan apa yang sebaiknya dipanggil.
+
 Gunakan subagent kapan pun dibutuhkan — riset fakta/data untuk mendukung diskusi, atau verifikasi informasi teknis sebelum persona memberi pendapat.
 
 ---
@@ -100,6 +102,38 @@ Setelah semua persona diperkenalkan, buka sesi diskusi bebas.
 
 4. **Rapat bisa diakhiri kapan saja** — user ketik "selesai" atau "tutup rapat" untuk menutup sesi.
 
+5. **Saat keputusan mulai mengerucut, @Galbi menandainya** sebagai salah satu dari tiga status berikut:
+   - **Keputusan Final** — siap diturunkan ke dokumen
+   - **Masih Terbuka** — perlu diskusi lanjutan atau data tambahan
+   - **Action Item** — perlu dikerjakan oleh skill lain setelah rapat
+
+---
+
+## Langkah 3b — Siapkan Handoff Artefak
+
+Sebelum rapat ditutup, @Galbi merapikan hasil diskusi menjadi tiga kelompok:
+
+1. **Keputusan Final**
+2. **Open Questions / Masih Terbuka**
+3. **Action Items**
+
+Untuk setiap **Keputusan Final**, tentukan artefak tujuan. Gunakan mapping ini:
+
+- Scope fitur, user flow, business rule → `project-context/PRD.md`
+- Keputusan teknis, ADR, struktur sistem → `project-context/architecture.md`
+- Model data, tabel, relasi → `project-context/schema.md`
+- Endpoint, auth contract, error contract → `project-context/api.md`
+- UI, komponen, design tokens → `project-context/StyleGuide.md`
+- Aturan coding atau perilaku AI → `project-context/rules.md`
+- Pekerjaan lanjutan / fase baru → `project-context/Task.md`
+- Bug yang sudah terbukti selesai → `project-context/bug-log.md`
+
+Jika sebuah keputusan tidak cocok ke dokumen lain, gunakan fallback berikut:
+- **Keputusan teknis final** → masukkan ke `project-context/architecture.md` sebagai ADR
+- **Pertanyaan yang belum selesai** → masukkan ke `project-context/PRD.md` bagian Open Questions
+
+Tujuannya: jangan biarkan keputusan penting hanya hidup di chat.
+
 ---
 
 ## Langkah 4 — Tutup Rapat
@@ -112,7 +146,22 @@ Ketika user menutup rapat:
 Ringkasan diskusi:
 - [poin penting 1 yang dibahas]
 - [poin penting 2 yang dibahas]
-- [keputusan atau action item jika ada]
+
+Keputusan Final:
+- [keputusan final 1]
+
+Masih Terbuka:
+- [pertanyaan atau risiko yang belum selesai]
+
+Action Items:
+- [aksi lanjutan 1]
+
+Artefak yang harus diupdate:
+- `project-context/[nama-file].md` — [apa yang harus ditambahkan/diubah]
+- `project-context/[nama-file].md` — [apa yang harus ditambahkan/diubah]
+
+Skill lanjutan yang disarankan:
+- `[nama-skill]` — [untuk mengeksekusi hasil rapat]
 
 Sampai jumpa! 👋
 ```
@@ -126,3 +175,5 @@ Sampai jumpa! 👋
 3. **Tidak ada persona yang dominan** — semua punya ruang yang sama
 4. **Gunakan `@NamaNya`** — selalu prefix nama persona dengan `@` agar tidak bingung dengan nama user
 5. **Rapat adalah diskusi** — bukan eksekusi. Jika ada yang perlu dikerjakan, tutup rapat dulu lalu panggil skill yang sesuai
+6. **Setiap keputusan final harus punya target artefak** — minimal satu dokumen tujuan yang jelas
+7. **Jika belum ada keputusan final, hasilkan open questions** — jangan memaksa keputusan palsu hanya demi menutup rapat

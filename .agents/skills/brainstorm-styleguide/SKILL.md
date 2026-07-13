@@ -44,7 +44,26 @@ Skill ini digunakan untuk membantu user membuat **StyleGuide.md** melalui sesi w
    - `project-context/PRD.md` — platform target dan referensi UI yang sudah disebutkan.
    - `project-context/architecture.md` — tech stack frontend yang sudah dipilih.
 
-3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
+3. **Setup sesi** — sebelum bertanya, cek `.agents/developer-config.json` untuk field berikut:
+
+    ```json
+    {
+       "brainstormPreferences": {
+          "discussionMode": "one-by-one" | "three-at-a-time",
+          "recommendations": true | false
+       }
+    }
+    ```
+
+    - Jika file belum ada, buat nanti setelah user menjawab.
+    - Jika preferensi sudah ada, tampilkan konfirmasi singkat:
+       > "Saya menemukan preferensi sesi tersimpan:
+       > - Mode pembahasan: [satu per satu / per 3 topik]
+       > - Rekomendasi: [ya / tidak]
+       > Gunakan seperti ini, atau mau override untuk sesi ini?"
+    - Jika user setuju, pakai preferensi itu dan **jangan ulangi dua pertanyaan setup**.
+    - Jika user override, pakai jawaban baru lalu update `.agents/developer-config.json` sambil mempertahankan field lain.
+    - Jika preferensi belum ada, lanjut tanya dua hal berikut lalu simpan jawabannya ke `.agents/developer-config.json` untuk sesi berikutnya.
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **7 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"

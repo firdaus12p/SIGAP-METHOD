@@ -366,9 +366,26 @@ Tujuan: mengekspos tebakan tersembunyi sebelum masuk ke fase verifikasi. Ini buk
 
 ---
 
+### 3c.6 — Validasi Task (Wajib Sebelum Update Task.md)
+
+Sebelum menandai task selesai, jalankan **satu validasi paling sempit** yang bisa membuktikan task ini benar.
+
+Pilih validasi berdasarkan jenis task:
+- **Task test:** jalankan test yang baru dibuat. Untuk TDD murni, test boleh gagal **untuk alasan yang tepat** jika implementasi memang belum ada; yang penting test dapat dijalankan dan benar-benar mengunci behavior yang dituju.
+- **Task implementasi yang punya test terkait:** jalankan ulang test sempit yang relevan, dan hasilnya harus lulus.
+- **Task config / wiring / refactor kecil:** jalankan check paling sempit yang masuk akal, misalnya test spesifik, typecheck file/slice terkait, lint file terkait, atau command lain yang benar-benar menyentuh perubahan ini.
+- **Jika tidak ada validasi executable yang masuk akal:** lakukan verifikasi manual terhadap acceptance criteria, lalu jelaskan kenapa tidak ada command yang bisa dijalankan.
+
+Aturan validasi task:
+- Jika validasi gagal karena defect lokal, perbaiki task yang sama lalu ulangi validasi yang sama.
+- Jangan update `Task.md` sebelum validasi task selesai dijalankan.
+- Catat command/check yang dipakai, karena ini harus dilaporkan singkat ke user.
+
+---
+
 ### 3d. Update Task.md
 
-Setelah task selesai, update `project-context/Task.md`:
+Setelah task selesai **dan lolos validasi task**, update `project-context/Task.md`:
 1. Ubah `[ ]` menjadi `[x]` pada baris task yang selesai
 2. Ubah `[ ]` menjadi `[x]` pada setiap Acceptance Criteria yang sudah terpenuhi
 3. Tambahkan catatan opsional jika ada keputusan implementasi penting:
@@ -395,6 +412,9 @@ Selesai! [nama task] sudah done.
 Yang saya buat/ubah:
 - [path/file] — [deskripsi satu baris]
 - [path/file] — [deskripsi satu baris]
+
+Validasi task:
+- [command / check] — [hasil singkat]
 ```
 
 Setelah laporan, cek `Task.md § Aturan Eksekusi`:

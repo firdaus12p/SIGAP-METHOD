@@ -28,6 +28,7 @@ Kamu tidak menebak-nebak. Kamu mendiagnosis dulu secara terstruktur, cek apakah 
 - Cek bug-log sebelum mulai — mungkin bug ini pernah terjadi sebelumnya
 - Fix dengan minimal perubahan — jangan ubah lebih dari yang perlu
 - Tunggu konfirmasi user sebelum catat ke bug-log
+- Setelah fix terbukti benar, tambahkan regression prevention yang paling masuk akal
 - Jalankan spec-compliance + code-review setelah fix
 - Gunakan subagent kapan pun dibutuhkan — riset root cause mendalam atau eksplorasi banyak file sekaligus
 
@@ -168,7 +169,7 @@ Setelah semua verifikasi bersih, tanya user:
 spec-compliance dan code-review sudah bersih.
 
 Apakah bug-nya sudah teratasi dari sisi kamu?
-(Kalau sudah, saya akan catat ke bug-log. Kalau belum, kita lanjut diagnosis.)
+(Kalau sudah, saya akan tambahkan regression prevention lalu catat ke bug-log. Kalau belum, kita lanjut diagnosis.)
 ```
 
 **Jika user bilang BELUM teratasi:**
@@ -179,7 +180,47 @@ Lanjut ke Langkah 6.
 
 ---
 
-## Langkah 6 — Catat ke Bug Log
+## Langkah 6 — Tambah Regression Prevention
+
+Setelah user mengonfirmasi fix benar, tambahkan **pencegahan agar bug yang sama tidak diam-diam kembali**.
+
+Pilih pencegahan yang paling kuat dan paling masuk akal untuk konteks project:
+
+### 6a. Prioritas 1 — Regression Test
+Jika project sudah punya test framework atau area yang disentuh memang punya test:
+- Tambahkan atau update test yang mereproduksi bug lama
+- Pastikan test itu gagal sebelum fix dan lulus setelah fix
+- Prioritaskan test yang paling dekat dengan root cause (unit/integration/e2e secukupnya)
+
+### 6b. Prioritas 2 — Guardrail di Spec atau Rules
+Jika bug terjadi karena aturan/spec tidak eksplisit:
+- Update dokumen yang paling relevan (`rules.md`, `PRD.md`, `api.md`, `schema.md`, atau `architecture.md`)
+- Tambahkan aturan, acceptance criteria, atau constraint yang mencegah pola bug yang sama
+
+### 6c. Prioritas 3 — Manual Regression Check
+Jika test belum memungkinkan dan spec tidak perlu diubah:
+- Tulis langkah cek ulang yang singkat, konkret, dan bisa diulang user/developer berikutnya
+- Gunakan ini sebagai fallback, bukan pilihan pertama
+
+**Aturan penting:**
+- Jangan menambah framework testing baru hanya demi formalitas jika itu di luar scope bug
+- Jangan update spec secara sembarang; hanya lakukan jika root cause memang berasal dari gap spec/rule
+- Minimal harus ada **satu** bentuk regression prevention: test, guardrail spec/rules, atau checklist manual
+- Jika regression prevention mengarah ke perubahan spec/rule yang memperluas scope bug, konfirmasi dulu ke user atau arahkan ke diskusi/skill lanjutan sebelum mengubah dokumen spec
+
+Setelah prevention ditambahkan, laporkan singkat ke user:
+
+```
+Regression prevention ditambahkan.
+
+- Test: [path/test] / [tidak ada — alasan]
+- Spec/Rule update: [file] / [tidak perlu — alasan]
+- Manual check: [ringkasan langkah] / [tidak perlu]
+```
+
+---
+
+## Langkah 7 — Catat ke Bug Log
 
 Setelah user konfirmasi fix sudah benar, baru catat ke `project-context/bug-log.md`.
 
@@ -215,8 +256,13 @@ Tambahkan entri baru di bawah header (atau di bawah entri terakhir):
 ### File yang Diubah
 - `path/file` — [deskripsi perubahan]
 
+### Regression Prevention
+- **Regression Test:** `path/test` — [skenario yang sekarang dilindungi] / `N/A — [alasan]`
+- **Spec/Rule Update:** `project-context/[file].md` — [aturan/acceptance criteria yang ditambahkan] / `N/A — [alasan]`
+- **Manual Regression Check:** [langkah cek ulang jika automated test belum ada] / `N/A`
+
 ### Cara Mencegah Terulang
-[Pola atau kebiasaan yang harus diperhatikan agar bug ini tidak muncul lagi]
+[Pola, guardrail, atau kebiasaan yang harus diperhatikan agar bug ini tidak muncul lagi]
 
 ### Pattern Tags
 Pilih dari daftar tag baku berikut (boleh lebih dari satu). Tambah tag baru hanya jika benar-benar tidak ada yang cocok:
@@ -239,16 +285,17 @@ Tentukan nomor BUG-N secara otomatis berdasarkan jumlah entri yang sudah ada di 
 3. **Cek bug-log sebelum mulai** — mungkin pola ini sudah pernah ditangani
 4. **Minimal change** — jangan ubah kode di luar scope bug yang dilaporkan
 5. **spec-compliance + code-review wajib** — tidak boleh skip setelah fix
-6. **Satu bug satu entri** — jika fix ternyata salah dan perlu diagnosis ulang, jangan tambah entri dulu
+6. **Setelah fix benar, tambahkan regression prevention** — test, guardrail spec/rule, atau checklist manual
+7. **Satu bug satu entri** — jika fix ternyata salah dan perlu diagnosis ulang, jangan tambah entri dulu
 
 ---
 
-## Langkah 7 — Handoff
+## Langkah 8 — Handoff
 
 Setelah bug dicatat ke bug-log.md, informasikan ke user:
 
 ```
-Bug sudah diperbaiki dan dicatat di project-context/bug-log.md.
+Bug sudah diperbaiki, regression prevention sudah ditambahkan, dan entri sudah dicatat di project-context/bug-log.md.
 
 Langkah selanjutnya:
 - Jika masih ada task [ ] di Task.md → panggil `developer` untuk lanjut coding

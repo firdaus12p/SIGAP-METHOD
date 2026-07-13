@@ -96,9 +96,10 @@ Ada pertanyaan? Atau langsung mau mulai?
 | Ada Task.md, ada task belum selesai `[ ]` | Lanjut ke `developer` |
 | Semua task selesai `[x]`, ada fitur baru | Lanjut ke `add-feature` |
 | Ada bug yang perlu diperbaiki | Lanjut ke `bug-fix` |
-| Ada beberapa spec selesai, ingin cek konsistensi | Jalankan `spec-audit` |
+| Ada beberapa spec selesai, ingin cek konsistensi | Jalankan `spec-audit` dalam **mode project** |
+| Ingin audit README, skill docs, atau workflow MACCA itu sendiri | Jalankan `spec-audit` dalam **mode framework** |
 | Ingin diskusi dengan tim tentang apapun | Jalankan `rapat` |
-| Semua task selesai `[x]`, tidak ada perubahan | Project selesai! Jalankan `spec-audit` untuk final cross-check konsistensi semua dokumen |
+| Semua task selesai `[x]`, tidak ada perubahan | Project selesai! Jalankan `spec-audit` dalam **mode project** untuk final cross-check konsistensi semua dokumen |
 
 ---
 
@@ -164,6 +165,8 @@ Setiap skill `brainstorm-*` punya dua pertanyaan setup di awal sesi:
 - *Ya*: untuk setiap topik, AI riset terbaru terlebih dahulu (via subagent/context7/exa), lalu bertanya beserta rekomendasinya. Rekomendasi berdasarkan data riset, bukan asumsi
 - *Tidak*: AI bertanya saja tanpa rekomendasi — cocok jika kamu sudah tahu jawabannya
 
+Preferensi ini bisa disimpan di `.agents/developer-config.json` pada field `brainstormPreferences`, jadi sesi berikutnya cukup konfirmasi singkat atau override — tidak perlu mulai dari nol setiap kali.
+
 ---
 
 ### Penjelasan Setiap Skill
@@ -193,7 +196,7 @@ Setiap skill `brainstorm-*` punya dua pertanyaan setup di awal sesi:
 #### `brainstorm-architecture`
 **Siapa:** Senior Software Architect AI
 
-**Apa yang dilakukan:** Wawancara tentang bagaimana sistem dibangun — tech stack, struktur folder, pola arsitektur, deployment, dan keputusan teknis (ADR). 9 topik.
+**Apa yang dilakukan:** Wawancara tentang bagaimana sistem dibangun — tech stack, struktur folder, pola arsitektur, threat model ringan, deployment, dan keputusan teknis (ADR). 10 topik.
 
 **Kapan digunakan:** Setelah PRD selesai.
 
@@ -254,9 +257,10 @@ Setiap skill `brainstorm-*` punya dua pertanyaan setup di awal sesi:
 3. Memilih spec yang relevan (tidak semua — hanya yang dibutuhkan)
 4. Mengerjakan semua task dalam satu fase
 5. Jika ada yang ambigu: berhenti, jelaskan dengan analogi, tanya kamu
-6. Update Task.md setelah tiap task
-7. Otomatis jalankan spec-compliance + code-review setelah fase selesai
-8. Tanya apakah lanjut ke fase berikutnya
+6. Menjalankan validasi kecil setelah tiap task sebelum task itu ditandai selesai
+7. Update Task.md setelah tiap task tervalidasi
+8. Otomatis jalankan spec-compliance + code-review setelah fase selesai
+9. Tanya apakah lanjut ke fase berikutnya
 
 **Kapan digunakan:** Setelah Task.md ada. Panggil setiap sesi coding.
 
@@ -292,11 +296,11 @@ Setiap skill `brainstorm-*` punya dua pertanyaan setup di awal sesi:
 #### `bug-fix`
 **Siapa:** Senior Debugger AI
 
-**Apa yang dilakukan:** Mendiagnosis root cause bug, mengecek `project-context/bug-log.md` untuk pola serupa, memperbaiki dengan perubahan minimal, dan mencatat ke bug-log setelah user konfirmasi fix sudah benar.
+**Apa yang dilakukan:** Mendiagnosis root cause bug, mengecek `project-context/bug-log.md` untuk pola serupa, memperbaiki dengan perubahan minimal, lalu setelah user mengonfirmasi fix benar menambahkan regression prevention yang sesuai (test, update rule/spec, atau checklist manual) sebelum mencatat ke bug-log.
 
 **Kapan digunakan:** Kapan saja ada bug — bisa di tengah development maupun setelah project selesai.
 
-**Output:** Kode yang diperbaiki + entri baru di `project-context/bug-log.md`
+**Output:** Kode yang diperbaiki + regression prevention + entri baru di `project-context/bug-log.md`
 
 ---
 
@@ -314,9 +318,13 @@ Setiap skill `brainstorm-*` punya dua pertanyaan setup di awal sesi:
 #### `spec-audit`
 **Siapa:** Spec Reviewer AI
 
-**Apa yang dilakukan:** Memeriksa konsistensi *antar* dokumen spec — apakah PRD, architecture, schema, api, rules, dan StyleGuide saling selaras. Melaporkan konflik, inkonsistensi, dan ambiguitas beserta solusi dan alasannya.
+**Apa yang dilakukan:** Memeriksa konsistensi *antar* dokumen. Skill ini punya dua mode:
+- **Mode project:** audit PRD, architecture, schema, api, rules, StyleGuide, dan Task
+- **Mode framework:** audit README, skill docs, dan instruksi MACCA itu sendiri
 
-**Kapan digunakan:** Setelah beberapa atau semua spec selesai dibuat. Sebelum mulai coding.
+Keduanya melaporkan konflik, inkonsistensi, dan ambiguitas beserta solusi dan alasannya.
+
+**Kapan digunakan:** Setelah beberapa atau semua spec project selesai dibuat, atau saat ingin merapikan konsistensi framework MACCA.
 
 **Output:** Laporan konflik dengan lokasi, penjelasan, dan solusi spesifik.
 
@@ -325,7 +333,9 @@ Setiap skill `brainstorm-*` punya dua pertanyaan setup di awal sesi:
 #### `spec-init`
 **Siapa:** Spec Archaeologist AI
 
-**Apa yang dilakukan:** Membaca codebase yang sudah ada dan menghasilkan semua dokumen `project-context/*.md` dari kode yang sudah berjalan. Ada dua mode: Batch (semua sekaligus) atau Terpandu (satu per satu dengan konfirmasi).
+**Apa yang dilakukan:** Membaca codebase yang sudah ada dan menghasilkan semua dokumen `project-context/*.md` dari kode yang sudah berjalan. Ada dua mode: Batch Generate (semua sekaligus) atau Guided Generate (satu per satu dengan konfirmasi). Setiap dokumen diberi `Confidence Summary` agar user tahu mana yang observasi langsung, mana yang inferensi, dan mana yang masih perlu verifikasi.
+
+**Catatan:** `Confidence Summary` adalah fitur default `spec-init`, bukan kewajiban semua skill `brainstorm-*`, karena `spec-init` bekerja dari observasi + inferensi codebase existing.
 
 **Kapan digunakan:** Saat project sudah berjalan tapi belum punya spec, atau saat menggunakan boilerplate yang sudah ada.
 
@@ -336,11 +346,11 @@ Setiap skill `brainstorm-*` punya dua pertanyaan setup di awal sesi:
 #### `rapat`
 **Siapa:** @Galbi — Project Manager
 
-**Apa yang dilakukan:** Memfasilitasi sesi diskusi tim. @Galbi membuka rapat, user memilih persona yang ingin hadir (@Fachri, @Akram, @Firdaus, @Ikhsan, atau semua), lalu sesi diskusi bebas dibuka. Setiap persona bisa dipanggil by name untuk memberi perspektif dari sudut pandang role-nya.
+**Apa yang dilakukan:** Memfasilitasi sesi diskusi tim. @Galbi membuka rapat, user memilih persona yang ingin hadir (@Fachri, @Akram, @Firdaus, @Ikhsan, atau semua), lalu sesi diskusi bebas dibuka. Setiap persona bisa dipanggil by name untuk memberi perspektif dari sudut pandang role-nya. Saat rapat ditutup, hasilnya dirapikan menjadi keputusan final, open questions, action items, dan target artefak yang harus diupdate.
 
 **Kapan digunakan:** Kapan saja ada pertanyaan atau keputusan yang perlu perspektif dari lebih dari satu role — misal: diskusi arsitektur sambil mempertimbangkan tampilan UI, atau diskusi fitur baru sebelum implementasi.
 
-**Output:** Diskusi dan keputusan bersama tim.
+**Output:** Diskusi dan keputusan bersama tim, plus handoff artefak yang jelas ke dokumen atau skill lanjutan.
 
 ---
 

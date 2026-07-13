@@ -43,8 +43,29 @@ Skill ini digunakan untuk membuat **rules.md** — "konstitusi" kode yang membua
 2. **Baca project-context yang ada** (sebelum interaksi apapun ke user):
    - `project-context/architecture.md` — tech stack dan pola yang sudah ditetapkan.
    - `project-context/PRD.md` — platform dan constraint yang mempengaruhi standar kode.
+  - `project-context/schema.md` — jika ada, terutama untuk keputusan PII, retention, dan proteksi data.
+  - `project-context/api.md` — jika ada, terutama untuk auth contract, rate limit, dan kontrol abuse.
 
-3. **Setup sesi** — minta input dua hal ini ke user sebagai pembuka:
+3. **Setup sesi** — sebelum bertanya, cek `.agents/developer-config.json` untuk field berikut:
+
+   ```json
+   {
+     "brainstormPreferences": {
+       "discussionMode": "one-by-one" | "three-at-a-time",
+       "recommendations": true | false
+     }
+   }
+   ```
+
+   - Jika file belum ada, buat nanti setelah user menjawab.
+   - Jika preferensi sudah ada, tampilkan konfirmasi singkat:
+     > "Saya menemukan preferensi sesi tersimpan:
+     > - Mode pembahasan: [satu per satu / per 3 topik]
+     > - Rekomendasi: [ya / tidak]
+     > Gunakan seperti ini, atau mau override untuk sesi ini?"
+   - Jika user setuju, pakai preferensi itu dan **jangan ulangi dua pertanyaan setup**.
+   - Jika user override, pakai jawaban baru lalu update `.agents/developer-config.json` sambil mempertahankan field lain.
+   - Jika preferensi belum ada, lanjut tanya dua hal berikut lalu simpan jawabannya ke `.agents/developer-config.json` untuk sesi berikutnya.
 
    **a. Mode pembahasan:**
    > "Sesi ini ada **7 topik**. Mau bahas **satu per satu**, atau **per 3 topik** sekaligus?"
@@ -112,6 +133,7 @@ Gali:
 - XSS prevention (`dangerouslySetInnerHTML` — kapan boleh/tidak?)
 - CORS: origin apa yang diizinkan?
 - Secret scanning: apakah ada pre-commit hook?
+- Selaraskan aturan ini dengan keputusan keamanan yang sudah muncul di `architecture.md`, `schema.md`, dan `api.md` — jangan mendefinisikan aturan yang bertentangan.
 
 ### 5. AI Behavior Rules
 Tanyakan: *"Aturan khusus untuk AI saat menulis kode? Misal: kapan harus tanya dulu sebelum action?"*
@@ -289,6 +311,7 @@ function processUser(user: User | null) {
 
 - **AI Persona (topik 1) HARUS jadi seksi pertama** — ini adalah yang paling impactful.
 - **Security Rules (topik 4) wajib ada `<SECURITY_REVIEW>` trigger** — tanpa ini AI tidak pause untuk review keamanan.
+- **Security Rules (topik 4) harus mengikat keputusan keamanan yang sudah dibahas lebih awal** di architecture/schema/api — jangan menunggu rules.md untuk pertama kali memikirkan keamanan.
 - **Git Workflow (topik 6) dengan Conventional Commits** — memungkinkan automated changelog.
 - Tanya satu per satu.
 - Gunakan Bahasa Indonesia untuk interaksi.

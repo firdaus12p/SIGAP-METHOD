@@ -63,6 +63,8 @@ Baca semua dokumen berikut yang tersedia di folder `project-context/`:
 
 Baca semua yang tersedia — jangan skip satupun.
 
+Selain memahami isinya, catat juga pola ID yang sudah dipakai jika dokumen-dokumen itu sudah memiliki ID stabil seperti `FEAT-*`, `BR-*`, `NFR-*`, `DATA-*`, `API-*`, atau `TASK-*`.
+
 ---
 
 ## Langkah 2 — Analisis Dampak
@@ -75,13 +77,13 @@ Tampilkan hasil analisis ke user sebelum mulai update:
 Analisis dampak untuk fitur "[nama fitur]":
 
 ✅ PRD.md — TERDAMPAK
-   Perlu tambah: [deskripsi singkat apa yang perlu ditambahkan]
+   Perlu tambah: [deskripsi singkat apa yang perlu ditambahkan] → [ID baru jika sudah bisa ditentukan, misal `FEAT-04`]
 
 ✅ schema.md — TERDAMPAK
-   Perlu tambah: [tabel/kolom baru atau relasi baru]
+   Perlu tambah: [tabel/kolom baru atau relasi baru] → [ID baru, misal `DATA-05`]
 
 ✅ api.md — TERDAMPAK
-   Perlu tambah: [endpoint baru]
+   Perlu tambah: [endpoint baru] → [ID baru, misal `API-07`]
 
 ⬜ architecture.md — TIDAK TERDAMPAK
    Tidak ada perubahan pada tech stack atau struktur folder
@@ -113,12 +115,24 @@ Untuk setiap dokumen yang ditandai **TERDAMPAK**, lakukan update secara beruruta
 - **Append, jangan overwrite** — tambahkan di bagian yang relevan, jangan ubah yang sudah ada kecuali memang konflik
 - **Konsisten dengan gaya penulisan yang sudah ada** di dokumen tersebut
 - **Tandai dengan jelas** bagian mana yang baru (tidak perlu tag khusus, cukup posisi yang logis)
+- **Pertahankan ID lama** — jangan acak ulang ID yang sudah ada; item baru mendapat ID baru yang konsisten dengan pola existing
 
 Setelah setiap dokumen diupdate, laporan singkat:
 ```
-✅ PRD.md diupdate — ditambahkan: [deskripsi singkat]
-✅ schema.md diupdate — tabel baru: [nama tabel]
-✅ api.md diupdate — endpoint baru: [method + path]
+✅ PRD.md diupdate
+   - Lokasi: [section / heading]
+   - Perubahan: [deskripsi singkat]
+   - ID baru: [FEAT-04 / BR-08 / AC-12]
+
+✅ schema.md diupdate
+   - Lokasi: [section / heading]
+   - Perubahan: [tabel/kolom/relasi baru]
+   - ID baru: [DATA-05]
+
+✅ api.md diupdate
+   - Lokasi: [section / heading]
+   - Perubahan: [endpoint baru]
+   - ID baru: [API-07]
 ```
 
 ---
@@ -146,6 +160,7 @@ Sebelum memanggil `brainstorm-task`, sampaikan konteks:
   - **File:** `[path/ke/file.ext]`
   - **Deskripsi:** [Apa yang dikerjakan dalam task ini]
   - **Referensi:** [`project-context/architecture.md#SeksiN` / `project-context/rules.md#SeksiN`]
+   - **Traceability IDs:** [`FEAT-04` / `API-07` / `DATA-05`]
   - **Acceptance Criteria:**
     - [ ] [Kondisi testable 1]
     - [ ] [Kondisi testable 2]
@@ -154,6 +169,7 @@ Sebelum memanggil `brainstorm-task`, sampaikan konteks:
   - **File:** `[path/ke/file.ext]`
   - **Deskripsi:** [Apa yang dikerjakan]
   - **Referensi:** [`project-context/schema.md#NamaTabel`]
+   - **Traceability IDs:** [`FEAT-04` / `DATA-05`]
   - **Acceptance Criteria:**
     - [ ] [Kondisi testable 1]
     - [ ] [Kondisi testable 2]

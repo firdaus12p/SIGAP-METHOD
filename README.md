@@ -69,6 +69,11 @@ MACCA menggunakan **skill** — instruksi terstruktur yang diberikan ke AI untuk
 
 Semua dokumen hasil perencanaan disimpan di folder `project-context/` di dalam project kamu.
 
+> **Kapan saja:** kamu bisa memanggil `rapat` di fase perencanaan maupun eksekusi jika butuh diskusi multi-persona sebelum lanjut.
+
+Mulai dari requirement utama, spec sebaiknya memakai ID stabil dan field traceability sederhana agar coverage ke schema, API, task, dan implementasi bisa diaudit dengan cepat.
+Untuk data yang bisa dibuat terstruktur, utamakan tabel, heading tetap, dan field eksplisit — jangan kembali ke prose bebas jika informasi itu perlu diaudit mesin maupun manusia.
+
 ---
 
 ## 3. Glosarium Istilah
@@ -87,6 +92,7 @@ Semua dokumen hasil perencanaan disimpan di folder `project-context/` di dalam p
 | **Task.md** | Rencana kerja bertahap: daftar semua tugas yang harus dikerjakan, dikelompokkan per fase. |
 | **Fase** | Kelompok task yang saling berkaitan, diselesaikan bersama. Contoh: "Fase 1: Setup Database". |
 | **Task** | Satuan pekerjaan terkecil yang bisa diselesaikan dalam satu sesi. |
+| **Traceability ID** | ID stabil seperti `FEAT-01`, `BR-02`, `API-03`, `DATA-01` yang dipakai untuk melacak requirement dari PRD sampai task dan implementasi. |
 | **Acceptance Criteria** | Kondisi yang harus terpenuhi agar sebuah task dianggap selesai. Bisa dicek secara konkret. |
 | **Boilerplate** | Template atau starter code project yang sudah ada sebelum mulai coding dari nol. |
 | **spec-compliance** | Verifikasi bahwa kode sudah sesuai dengan dokumen spec. |
@@ -94,6 +100,52 @@ Semua dokumen hasil perencanaan disimpan di folder `project-context/` di dalam p
 | **bug-log.md** | Catatan semua bug yang pernah ditemukan dan diperbaiki — supaya AI belajar dari sejarah. |
 | **[FORBIDDEN]** | Seksi di `rules.md` berisi daftar larangan teknis (hardcode, `any`, console.log, dll). AI memindainya sebelum menulis kode. |
 | **[SELF-REVIEW]** | Output singkat dari `developer` setelah tiap task selesai: 1 potensi security risk, 1 performance bottleneck, 1 asumsi yang dibuat dari spec. |
+
+### 3b. Traceability ID Scheme
+
+Gunakan prefix berikut secara konsisten di dokumen spec:
+
+| Prefix | Digunakan Untuk |
+|---|---|
+| `FEAT-01` | Fitur utama di `PRD.md` |
+| `BR-01` | Business rule di `PRD.md` |
+| `NFR-01` | Non-functional requirement di `PRD.md` |
+| `AC-01` | Acceptance criteria di `PRD.md` |
+| `US-01` | User story di `PRD.md` |
+| `DATA-01` | Tabel atau entitas data di `schema.md` |
+| `API-01` | Endpoint atau kontrak API di `api.md` |
+| `RULE-01` | Aturan spesifik di `rules.md` jika perlu dirujuk lintas dokumen |
+
+Aturan:
+- Nomor dimulai dari `01` untuk setiap prefix.
+- Jangan ubah ID lama hanya karena urutan konten berubah.
+- Item baru menambah ID baru; item lama mempertahankan ID lama.
+
+### 3c. developer-config.json Schema
+
+File `.agents/developer-config.json` adalah konfigurasi bersama lintas skill. Field-field ini **boleh hidup berdampingan** dalam satu file:
+
+```json
+{
+  "name": "Nama user",
+  "project": "Nama project",
+  "brainstormPreferences": {
+    "discussionMode": "one-by-one",
+    "recommendations": true
+  },
+  "additionalSkills": [
+    {
+      "name": "nama-skill",
+      "path": ".agents/skills/nama-skill/SKILL.md",
+      "purpose": "fungsi singkat"
+    }
+  ]
+}
+```
+
+Aturan penulisan:
+- Semua skill yang mengubah file ini harus **merge dengan isi yang sudah ada**, bukan menimpa seluruh file.
+- Field yang tidak dikenali skill tetap harus dipertahankan.
 
 ---
 
@@ -115,7 +167,7 @@ Semua dokumen hasil perencanaan disimpan di folder `project-context/` di dalam p
 
 | Skill | Persona | Fungsi | Kapan Digunakan |
 |---|---|---|---|
-| `developer` | @Firdaus | Mengerjakan task dari Task.md dengan pendekatan TDD — test ditulis sebelum implementasi, dilengkapi `[SELF-REVIEW]` setelah tiap task | Setelah Task.md ada dan siap dikerjakan |
+| `developer` | @Firdaus | Mengerjakan task dari Task.md dengan pendekatan TDD — test ditulis sebelum implementasi, tiap task divalidasi sempit, dan `[SELF-REVIEW]` ditulis setelah tiap task | Setelah Task.md ada dan siap dikerjakan |
 | `spec-compliance` | @Fachri | Verifikasi kode terhadap semua dokumen spec | Otomatis setelah setiap fase di developer |
 | `code-review` | @Fachri | Cek kualitas dan keamanan kode (27 item) | Setelah spec-compliance bersih |
 
@@ -124,11 +176,14 @@ Semua dokumen hasil perencanaan disimpan di folder `project-context/` di dalam p
 | Skill | Persona | Fungsi | Kapan Digunakan |
 |---|---|---|---|
 | `help` | @Galbi | Deteksi kondisi project & rekomendasikan langkah berikutnya | Kapan saja, terutama jika bingung harus mulai dari mana |
-| `bug-fix` | @Ikhsan | Diagnosis, perbaikan, dan dokumentasi bug | Saat ada bug yang perlu diperbaiki |
+| `bug-fix` | @Ikhsan | Diagnosis, perbaikan, dokumentasi bug, dan regression prevention | Saat ada bug yang perlu diperbaiki |
 | `add-feature` | @Galbi | Tambah fitur baru ke project yang sudah berjalan | Setelah project berjalan dan ada fitur baru |
-| `spec-audit` | @Fachri | Cek konsistensi antar semua dokumen spec | Setelah beberapa/semua spec selesai, sebelum coding |
-| `spec-init` | @Fachri | Buat semua spec dari codebase yang sudah ada | Untuk project yang sudah berjalan tapi belum punya spec |
-| `rapat` | @Galbi | Diskusi tim multi-persona dalam satu sesi | Kapan saja, saat butuh perspektif dari beberapa keahlian sekaligus |
+| `spec-audit` | @Fachri | Cek konsistensi antar dokumen spec project atau antar instruksi framework MACCA itu sendiri | Setelah beberapa/semua spec selesai, sebelum coding, atau saat ingin merapikan MACCA |
+| `spec-init` | @Fachri | Buat semua spec dari codebase yang sudah ada, lengkap dengan confidence summary per dokumen | Untuk project yang sudah berjalan tapi belum punya spec |
+| `rapat` | @Galbi | Diskusi tim multi-persona dalam satu sesi, dengan handoff keputusan ke artefak spec | Kapan saja, saat butuh perspektif dari beberapa keahlian sekaligus |
+
+> `spec-audit` punya dua mode: **mode project** untuk audit `project-context/`, dan **mode framework** untuk audit README + skill docs MACCA.
+> Gunakan **mode framework** terutama setelah perubahan besar di beberapa skill, sebelum rilis versi MACCA baru, saat ada skill baru, atau saat kamu curiga ada drift instruksi antar skill.
 
 ### Tim AI MACCA
 
@@ -141,6 +196,8 @@ Setiap skill dijalankan oleh satu **persona** — karakter AI dengan keahlian sp
 | **@Akram** | UI/UX Designer | `brainstorm-styleguide` |
 | **@Firdaus** | Expert Developer | `developer` |
 | **@Ikhsan** | Debugger | `bug-fix` |
+
+**Aturan Persona:** Setiap skill dirancang untuk satu persona spesifik. Jangan tukar persona pemilik skill, karena instruksi, nada, dan tanggung jawabnya sudah dibentuk untuk role tersebut.
 
 ---
 
@@ -174,7 +231,7 @@ Langkah 4: Tetapkan standar kode
   → Hasil: project-context/rules.md
 
 Langkah 5: Cek konsistensi (opsional tapi disarankan)
-  → Panggil: spec-audit
+  → Panggil: spec-audit (mode project)
   → Hasil: Laporan konflik antar dokumen
 
 Langkah 6: Buat rencana kerja
@@ -183,7 +240,8 @@ Langkah 6: Buat rencana kerja
 
 Langkah 7: Mulai coding
   → Panggil: developer
-  → Per fase: kode → spec-compliance → code-review → fase berikutnya
+  → Per task: kode → validasi task
+  → Per fase: spec-compliance → code-review → fase berikutnya
   → Hingga: semua task selesai
 ```
 
@@ -202,11 +260,13 @@ Langkah 1: Generate spec dari codebase yang ada
   
   Ada dua mode:
   ┌─────────────────────────────────────────────────────┐
-  │ Mode Batch    : Semua dokumen dibuat sekaligus.     │
+  │ Mode Batch Generate  : Semua dokumen dibuat         │
+  │                       sekaligus.                    │
   │                Cocok untuk project kecil.           │
   │                                                     │
-  │ Mode Terpandu : Satu dokumen dibuat, kamu review,   │
-  │                 konfirmasi, lalu lanjut ke berikutnya│
+  │ Mode Guided Generate : Satu dokumen dibuat,         │
+  │                        kamu review, konfirmasi,     │
+  │                        lalu lanjut ke berikutnya    │
   │                Cocok untuk project besar.           │
   └─────────────────────────────────────────────────────┘
   
@@ -218,10 +278,11 @@ Langkah 1: Generate spec dari codebase yang ada
 
 Langkah 2: Review & koreksi dokumen spec
   → Baca setiap file di project-context/ dan pastikan isinya akurat.
+  → Perhatikan terutama item dengan confidence Sedang / Rendah.
   → Koreksi jika ada yang tidak sesuai dengan kenyataan project.
 
 Langkah 3: Cek konsistensi
-  → Panggil: spec-audit
+  → Panggil: spec-audit (mode project)
   → Pastikan tidak ada konflik antar dokumen.
 
 Langkah 4: Buat rencana kerja untuk fitur-fitur baru
@@ -269,8 +330,9 @@ Apa yang terjadi:
   4. Kamu konfirmasi sebelum fix diterapkan
   5. Fix diterapkan, lalu spec-compliance + code-review dijalankan
   6. Kamu konfirmasi bahwa bug sudah teratasi
-  7. AI mencatat bug + solusi ke project-context/bug-log.md
-     (baru dicatat setelah kamu konfirmasi — tidak otomatis)
+  7. AI menambahkan regression prevention (test, rule/spec update, atau checklist manual)
+  8. AI mencatat bug + solusi ke project-context/bug-log.md
+    (baru dicatat setelah kamu konfirmasi — tidak otomatis)
 ```
 
 ---
@@ -360,7 +422,7 @@ Contoh struktur setelah install dengan GitHub Copilot dipilih:
 ```
 your-project/
 ├── .agents/
-│   ├── developer-config.json    ← nama developer & nama project (opsional)
+│   ├── developer-config.json    ← nama developer, nama project, dan preferensi brainstorm (opsional)
 │   └── macca-tools.txt          ← tools yang dipilih saat install
 │
 ├── .github/
@@ -429,6 +491,10 @@ Bisa. Gunakan skill `spec-init` — AI akan membaca kodebase yang ada dan mengha
 **Q: Apakah AI bisa membuat kesalahan?**
 
 Bisa. Itulah kenapa ada `spec-compliance` (cek kode vs spec) dan `code-review` (cek kualitas kode) yang dijalankan otomatis setelah setiap fase selesai. Jika ada yang tidak sesuai, AI memperbaikinya sebelum lanjut.
+
+**Q: Apakah semua dokumen punya `Confidence Summary`?**
+
+Tidak. `Confidence Summary` adalah output default dari `spec-init`, karena skill itu mengekstrak fakta dan inferensi dari codebase yang sudah ada. Skill `brainstorm-*` biasanya tidak memerlukannya karena isinya dibangun langsung lewat wawancara dan konfirmasi user.
 
 **Q: Bagaimana jika saya tidak mengerti istilah teknis?**
 
