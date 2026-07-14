@@ -6,6 +6,34 @@ TMP_DIR=$(mktemp -d)
 SELECTED=()
 trap 'rm -rf "$TMP_DIR" 2>/dev/null' INT TERM EXIT
 
+json_escape() {
+  local value="$1"
+  value=${value//\\/\\\\}
+  value=${value//\"/\\\"}
+  value=${value//$'\n'/\\n}
+  value=${value//$'\r'/\\r}
+  value=${value//$'\t'/\\t}
+  printf '%s' "$value"
+}
+
+normalize_language() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+
+  case "${value,,}" in
+    ""|id|indo|indonesia|indonesian|"bahasa indonesia")
+      printf 'indonesian'
+      ;;
+    en|eng|english|inggris|"bahasa inggris")
+      printf 'english'
+      ;;
+    *)
+      printf '%s' "${value,,}"
+      ;;
+  esac
+}
+
 # ─── Banner ────────────────────────────────────────────────────────────────────
 echo ""
 echo "  ╭─────────────────────────────────────────╮"
@@ -165,14 +193,34 @@ fi
 # ─── Save selected tools ───────────────────────────────────────────────────────────
 printf '%s\n' "${SELECTED[@]}" > .agents/macca-tools.txt
 
-# ─── Nama developer & project ───────────────────────────────────────────────────────────────────────────────────
+# ─── Nama developer, project, & language preferences ─────────────────────────────────────────────────────────────
 echo ""
 read -r -p "  Kamu mau di panggil apa? (Kosong = Skip): " DEV_NAME </dev/tty
 read -r -p "  Nama project ini apa? (Kosong = Skip): " PROJECT_NAME </dev/tty
-if [ -n "$DEV_NAME" ] || [ -n "$PROJECT_NAME" ]; then
-  printf '{\n  "name": "%s",\n  "project": "%s"\n}\n' "$DEV_NAME" "$PROJECT_NAME" > .agents/developer-config.json
+read -r -p "  Bahasa komunikasi yang anda inginkan? (Kosong = Bahasa Indonesia): " COMMUNICATION_LANGUAGE </dev/tty
+read -r -p "  Bahasa dokumen yang dihasilkan? (Kosong = Bahasa Indonesia): " DOCUMENT_LANGUAGE </dev/tty
+
+if [ -z "$COMMUNICATION_LANGUAGE" ]; then
+  COMMUNICATION_LANGUAGE="Bahasa Indonesia"
+fi
+
+if [ -z "$DOCUMENT_LANGUAGE" ]; then
+  DOCUMENT_LANGUAGE="Bahasa Indonesia"
+fi
+
+if [ -n "$DEV_NAME" ] || [ -n "$PROJECT_NAME" ] || [ -n "$COMMUNICATION_LANGUAGE" ] || [ -n "$DOCUMENT_LANGUAGE" ]; then
+  printf '{\n  "name": "%s",\n  "project": "%s",\n  "languagePreferences": {\n    "communication": {\n      "raw": "%s",\n      "normalized": "%s"\n    },\n    "documents": {\n      "raw": "%s",\n      "normalized": "%s"\n    }\n  }\n}\n' \
+    "$(json_escape "$DEV_NAME")" \
+    "$(json_escape "$PROJECT_NAME")" \
+    "$(json_escape "$COMMUNICATION_LANGUAGE")" \
+    "$(json_escape "$(normalize_language "$COMMUNICATION_LANGUAGE")")" \
+    "$(json_escape "$DOCUMENT_LANGUAGE")" \
+    "$(json_escape "$(normalize_language "$DOCUMENT_LANGUAGE")")" \
+    > .agents/developer-config.json
   if [ -n "$DEV_NAME" ];     then echo "  Nama developer disimpan: $DEV_NAME"; fi
   if [ -n "$PROJECT_NAME" ]; then echo "  Nama project disimpan:   $PROJECT_NAME"; fi
+  echo "  Bahasa komunikasi disimpan: $COMMUNICATION_LANGUAGE"
+  echo "  Bahasa dokumen disimpan:    $DOCUMENT_LANGUAGE"
 fi
 
 # ─── Cleanup & done ────────────────────────────────────────────────────────────────

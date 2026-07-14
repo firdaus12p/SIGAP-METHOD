@@ -144,6 +144,16 @@ File `.agents/developer-config.json` adalah konfigurasi bersama lintas skill. Fi
 {
   "name": "Nama user",
   "project": "Nama project",
+  "languagePreferences": {
+    "communication": {
+      "raw": "Bahasa Indonesia",
+      "normalized": "indonesian"
+    },
+    "documents": {
+      "raw": "Bahasa Indonesia",
+      "normalized": "indonesian"
+    }
+  },
   "developerPreferences": {
     "workMode": "direct"
   },
@@ -164,8 +174,14 @@ File `.agents/developer-config.json` adalah konfigurasi bersama lintas skill. Fi
 Aturan penulisan:
 - Semua skill yang mengubah file ini harus **merge dengan isi yang sudah ada**, bukan menimpa seluruh file.
 - Field yang tidak dikenali skill tetap harus dipertahankan.
+- `languagePreferences.*.raw` menyimpan input asli/effective choice dari user.
+- `languagePreferences.*.normalized` menyimpan bentuk stabil yang dipakai skill untuk routing bahasa output.
 
 Catatan:
+- Saat install pertama, installer menanyakan **bahasa komunikasi** dan **bahasa dokumen yang dihasilkan** lalu menyimpannya di file ini.
+- Untuk project lama yang belum punya `languagePreferences`, skill pertama yang dijalankan harus **bertanya sekali**, menyimpan hasilnya, lalu memakai preferensi itu untuk sesi berikutnya.
+- Semua **instruksi sistem skill** boleh ditulis dalam bahasa Inggris demi hemat token dan presisi, tetapi **output ke user** dan **dokumen yang dihasilkan** wajib mengikuti `languagePreferences`.
+- Literal sistem/teknis seperti nama file (`PRD.md`, `Task.md`), ID (`FEAT-01`, `API-01`), field (`ai_enabled`), atau simbol kode (`fromMe: true`) **tidak diterjemahkan**.
 - `developerPreferences.workMode` dipakai oleh skill `developer` untuk mengingat pilihan mode kerja (`direct` atau `plan-first`).
 - Begitu dipilih sekali, mode ini dipakai terus di sesi berikutnya sampai kamu meminta perubahan.
 

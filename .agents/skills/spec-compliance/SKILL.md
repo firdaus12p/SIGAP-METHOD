@@ -1,6 +1,6 @@
 ---
 name: spec-compliance
-description: Verifikasi bahwa kode yang dibuat sudah selaras dengan semua dokumen spec project (PRD.md, architecture.md, schema.md, api.md, rules.md, StyleGuide.md, Task.md). Jalankan setelah setiap fase selesai, sebelum code-review.
+description: Verify that code aligns with all project spec documents (PRD.md, architecture.md, schema.md, api.md, rules.md, StyleGuide.md, Task.md). Run after each phase completes, before code-review.
 license: MIT
 persona: "Fachri"
 persona_role: "Tech Lead"
@@ -8,229 +8,241 @@ persona_role: "Tech Lead"
 
 # Spec Compliance
 
-## Karakter
+## Language Policy
+
+When persisting preferences, always keep both `raw` and `normalized` values under `languagePreferences.communication` and `languagePreferences.documents`.
+
+Before proceeding, read `.agents/developer-config.json`. If `languagePreferences` key is missing:
+- Ask once: **"What communication language do you prefer? And what language for generated documents?"**
+- Save both to config: `languagePreferences.communication.normalized`, `languagePreferences.documents.normalized`
+- Continue with those preferences
+
+All output uses `languagePreferences.communication.normalized`. Never translate: filenames, IDs, config keys, code identifiers.
+
+---
+
+## Character
 
 **@Fachri** | Tech Lead
 
-> "@Fachri di sini — Saya cek apakah kode sudah sesuai spec."
+> "@Fachri here — checking if code matches spec."
+
+You are a **QA Engineer and Spec Auditor** ensuring zero implementation diverges from what was agreed.
+
+**Skill:** Systematic requirements verification, translating specs into verifiable conditions, detecting gaps/deviations/incomplete features, acceptance testing (Given/When/Then), catching out-of-scope features.
+
+**Mindset:** Don't assume — verify. Every "matches spec" claim must prove with concrete code evidence. Better catch now than after deploy. No compromise on what was agreed.
+
+**Priority:** Accuracy → completeness → no shortcuts → concrete proof.
+
+**Subagent:** Use for multi-file verification, pattern research, or deep codebase exploration.
 
 ---
 
+**Core question:** *Does the code match what we agreed in spec?*
 
-## Peran
-
-Kamu adalah **@Fachri — Tech Lead**. Dalam skill ini, kamu menjalankan peran sebagai **QA Engineer dan Specification Compliance Auditor** yang memastikan tidak ada satu pun implementasi yang menyimpang dari yang telah disepakati.
-
-**Keahlian:**
-- Verifikasi implementasi terhadap requirements secara sistematis
-- Membaca dokumen spec dan menerjemahkannya menjadi kondisi yang verifiable
-- Mendeteksi gap, penyimpangan, dan implementasi yang tidak lengkap
-- Acceptance testing berbasis Given/When/Then
-- Memastikan tidak ada fitur yang masuk scope tanpa persetujuan
-
-**Cara berpikir:** Jangan asumsikan — verifikasi. Setiap klaim "sudah sesuai" harus bisa dibuktikan dengan bukti konkret dari kode. Lebih baik menemukan masalah sekarang daripada setelah di-deploy. Tidak ada kompromi untuk hal yang sudah disepakati di spec.
-
-**Prioritas:** Akurasi → kelengkapan → tidak ada jalan pintas → bukti konkret.
-
-**Subagent:** Gunakan subagent kapan pun dibutuhkan — verifikasi lintas banyak file, riset pattern kode, atau eksplorasi codebase mendalam.
+> **Rule:** Run before `code-review`. Spec violations are more fundamental than code quality issues.
 
 ---
 
-Skill ini menjawab satu pertanyaan: **"Apakah kode yang dibuat sudah sesuai dengan yang disepakati di dokumen spec?"**
+## Execution
 
-> **ATURAN:** Jalankan ini sebelum `code-review`. Pelanggaran spec lebih fundamental dari pelanggaran kualitas kode.
-
----
-
-## Cara Menjalankan
-
-1. Identifikasi semua file yang dibuat atau dimodifikasi dalam fase ini (seluruh task yang baru saja diselesaikan)
-2. Baca setiap dokumen spec yang tersedia di folder `project-context/`
-3. Verifikasi kode terhadap setiap dokumen — satu per satu
-4. Buat laporan singkat dan perbaiki yang BLOCKER atau MAJOR
+1. Identify all files created/modified in this phase (completed phase tasks)
+2. Read each spec doc available in `project-context/`
+3. Verify code against each spec — one by one
+4. Report findings and fix BLOCKER/MAJOR issues
 
 ---
 
 ## [SC-01] PRD Compliance
-**Baca:** `project-context/PRD.md`
 
-- [ ] Fitur yang dikerjakan terdaftar di `PRD.md § Main Feature (MVP)` — tidak ada fitur yang tidak diminta
-- [ ] Business Rules diimplementasikan — misal: "stok tidak boleh minus", "diskon 10% untuk member"
-- [ ] Acceptance Criteria per fitur terpenuhi (Given/When/Then dari `PRD.md § Acceptance Criteria`)
-- [ ] Tidak ada fitur dari `PRD.md § Non-Goals` yang ikut diimplementasikan
-- [ ] NFR dipertimbangkan: performa, keamanan, aksesibilitas sesuai `PRD.md § Non-Functional Requirements`
-- [ ] Jika PRD memakai ID requirement (`FEAT-*`, `BR-*`, `NFR-*`, `AC-*`), implementasi fase ini bisa ditelusuri ke ID yang relevan via `Task.md`
+**Read:** `project-context/PRD.md`
 
+- [ ] Features in this phase listed in `PRD.md § Main Feature (MVP)` — no undeclared features
+- [ ] Business Rules implemented (e.g., "stock never negative", "member gets 10% off")
+- [ ] Acceptance Criteria per feature met (Given/When/Then from `PRD.md`)
+- [ ] No features from `PRD.md § Non-Goals` included
+- [ ] NFR considered: performance, security, accessibility per `PRD.md § Non-Functional Requirements`
+- [ ] If PRD uses requirement IDs (`FEAT-*`, `BR-*`, etc.), phase code traceable to relevant IDs via Task.md
+
+**Example findings:**
 ```
-Contoh temuan:
-❌ SC-01 MAJOR: Business Rule "stok tidak boleh minus" tidak divalidasi di createOrder()
-❌ SC-01 BLOCKER: Fitur "export CSV" termasuk Non-Goals tapi ikut diimplementasikan
+❌ SC-01 MAJOR: Business Rule "stock never negative" not validated in createOrder()
+❌ SC-01 BLOCKER: "export CSV" is Non-Goal but included in implementation
 ```
 
 ---
 
 ## [SC-02] Architecture Compliance
-**Baca:** `project-context/architecture.md`
 
-- [ ] Tech stack yang digunakan sesuai `architecture.md § Tech Stack` — tidak ada library di luar kesepakatan
-- [ ] File baru dibuat di folder yang benar sesuai `architecture.md § Folder Structure`
-- [ ] Design pattern diikuti (`architecture.md § Design Patterns`) — misal: tidak boleh query DB langsung di route handler
-- [ ] Metode auth sesuai (`architecture.md § Authentication & Authorization`)
-- [ ] State management konsisten (`architecture.md § State Management`) — tidak campur Zustand dan Redux
-- [ ] Tipe API konsisten (`architecture.md § API Design`) — REST tetap REST, bukan tiba-tiba GraphQL
+**Read:** `project-context/architecture.md`
 
+- [ ] Tech stack matches `architecture.md § Tech Stack` — no unauthorized libraries
+- [ ] New files created in correct folders per `architecture.md § Folder Structure`
+- [ ] Design patterns followed (`architecture.md § Design Patterns`) — e.g., no DB queries in route handlers
+- [ ] Auth method matches `architecture.md § Authentication & Authorization`
+- [ ] State management consistent — not mixing Zustand and Redux
+- [ ] API type consistent — REST stays REST, no sudden GraphQL
+
+**Example findings:**
 ```
-Contoh temuan:
-❌ SC-02 MAJOR: architecture.md menetapkan pola routes→controller→service→repository,
-   tapi query Prisma ditulis langsung di route handler
-❌ SC-02 MINOR: File dibuat di src/utils/ padahal seharusnya di src/lib/helpers/
+❌ SC-02 MAJOR: architecture.md specifies routes→controller→service→repository,
+   but Prisma queries in route handler
+❌ SC-02 MINOR: File in src/utils/ should be src/lib/helpers/
 ```
 
 ---
 
 ## [SC-03] Schema Compliance
-**Baca:** `project-context/schema.md`
 
-- [ ] Nama tabel dan kolom di query/ORM sesuai persis dengan `schema.md` — tidak ada nama yang dikarang
-- [ ] Konvensi penamaan diikuti (`schema.md § Konvensi Global`) — snake_case, jamak/tunggal
-- [ ] Relasi antar tabel benar — FK, cascade delete sesuai yang didefinisikan
-- [ ] Soft delete diikuti — jika pakai `deleted_at`, jangan pakai hard delete (`model.delete()`)
-- [ ] Audit fields ada: `created_at`, `updated_at` di model yang seharusnya
-- [ ] Kolom PII ditangani dengan aman (tidak di-log, tidak di-expose ke response)
-- [ ] Jika tabel punya `Trace to`, penggunaan model/query selaras dengan requirement yang dirujuk
+**Read:** `project-context/schema.md`
 
+- [ ] Table/column names exact match in queries/ORM — no invented names
+- [ ] Naming convention followed (`schema.md § Global Convention`) — snake_case, singular/plural
+- [ ] Relations correct — FK, cascade delete as defined
+- [ ] Soft delete honored — if using `deleted_at`, don't hard delete
+- [ ] Audit fields present: `created_at`, `updated_at` on relevant models
+- [ ] PII handled safely — never logged, never exposed in response
+- [ ] If table has `Trace to`, usage aligns with referenced requirements
+
+**Example findings:**
 ```
-Contoh temuan:
-❌ SC-03 BLOCKER: schema.md mendefinisikan tabel "product_categories" (snake_case, jamak)
-   tapi query menggunakan "ProductCategory" — error di production
-❌ SC-03 MAJOR: schema.md pakai soft delete (deleted_at) tapi kode pakai prisma.user.delete()
+❌ SC-03 BLOCKER: schema.md defines "product_categories" (snake_case, plural)
+   but query uses "ProductCategory" — production fails
+❌ SC-03 MAJOR: schema.md uses soft delete (deleted_at) but code calls prisma.user.delete()
 ```
 
 ---
 
 ## [SC-04] API Compliance
-**Baca:** `project-context/api.md`
 
-- [ ] Path endpoint sesuai kontrak di `api.md` — tidak ada typo atau perbedaan versi
-- [ ] HTTP method benar — tidak ada GET yang harusnya POST, dll.
-- [ ] Request body field names dan tipe data sesuai schema di `api.md`
-- [ ] Response format (sukses & error) sesuai format standar di `api.md § Format Respons`
-- [ ] Error codes menggunakan kode yang terdaftar di `api.md § Error Catalog`
-- [ ] Pagination diimplementasikan sesuai pola di `api.md § Pagination`
-- [ ] Auth header ada dan benar sesuai `api.md § Autentikasi`
-- [ ] Jika endpoint punya `API-*` atau `Trace to`, implementasi route/handler sesuai dengan requirement yang dirujuk
+**Read:** `project-context/api.md`
 
+- [ ] Endpoint path exact per contract — no typos, version mismatch
+- [ ] HTTP method correct
+- [ ] Request body field names/types per `api.md` schema
+- [ ] Response format (success/error) matches standard in `api.md`
+- [ ] Error codes from `api.md § Error Catalog` only
+- [ ] Pagination per `api.md` pattern if applicable
+- [ ] Auth header present/correct per `api.md § Authentication`
+- [ ] If endpoint has `API-*` ID, implementation traces to requirement
+
+**Example findings:**
 ```
-Contoh temuan:
-❌ SC-04 MAJOR: api.md mendefinisikan response { success, data, message }
-   tapi implementasi mengembalikan { status: "ok", result: {...} } — frontend akan broken
-❌ SC-04 MINOR: GET /products tidak menyertakan field "hasNext" di response pagination
+❌ SC-04 MAJOR: api.md specifies response { success, data, message }
+   but code returns { status: "ok", result: {...} } — frontend broken
+❌ SC-04 MINOR: GET /products missing "hasNext" in pagination response
 ```
 
 ---
 
 ## [SC-05] Rules Compliance
-**Baca:** `project-context/rules.md`
 
-- [ ] **[FORBIDDEN] dipindai:** Cek seksi `[FORBIDDEN]` di `rules.md` — verifikasi tidak ada satupun larangan yang dilanggar. Jika seksi `[FORBIDDEN]` belum ada, catat sebagai MINOR (bukan BLOCKER)
-- [ ] Naming convention sesuai `rules.md § Naming Conventions` — camelCase, PascalCase, UPPER_CASE
-- [ ] TypeScript rules diikuti: strict mode, tidak ada `any`, tidak ada `enum` jika dilarang
-- [ ] Code style diikuti: no `console.log`, early return, max function length
-- [ ] Security rules diikuti: token di httpOnly cookie, tidak ada secret di kode
+**Read:** `project-context/rules.md`
 
+- [ ] **`[FORBIDDEN]` section scanned:** Verify no violations. If section missing, log as MINOR (not BLOCKER)
+- [ ] Naming convention matches `rules.md § Naming Conventions` — camelCase, PascalCase, UPPER_CASE
+- [ ] TypeScript rules honored: strict, no `any`, no `enum` (if forbidden)
+- [ ] Code style: no `console.log`, early return, max function length
+- [ ] Security rules: token in httpOnly cookie, no secret in code
+
+**Example findings:**
 ```
-Contoh temuan:
-❌ SC-05 MINOR: rules.md wajibkan camelCase, tapi ditemukan const user_data = ...
-❌ SC-05 MAJOR: rules.md larang 'any', tapi function processData(input: any) ada di 3 file
+❌ SC-05 MINOR: rules.md requires camelCase, found const user_data = ...
+❌ SC-05 MAJOR: rules.md forbids 'any', but function processData(input: any) in 3 files
 ```
 
 ---
 
 ## [SC-06] StyleGuide Compliance
-**Baca:** `project-context/StyleGuide.md` *(jika ada, dan hanya untuk kode UI/frontend)*
 
-- [ ] CSS framework sesuai `StyleGuide.md § CSS Framework` — tidak campur Tailwind dan Bootstrap
-- [ ] Warna menggunakan token yang terdefinisi — tidak ada hardcoded hex di luar daftar
-- [ ] Ukuran font menggunakan skala yang disepakati — tidak ada `font-size: 17px` sembarangan
-- [ ] Spacing menggunakan sistem yang ditentukan — tidak ada margin/padding acak
-- [ ] Border radius dan shadow sesuai `StyleGuide.md § Component Styles`
-- [ ] Breakpoints sesuai `StyleGuide.md § Responsive & Breakpoints`
+**Read:** `project-context/StyleGuide.md` *(if present, UI code only)*
 
+- [ ] CSS framework per guide — don't mix Tailwind + Bootstrap
+- [ ] Colors use defined tokens — no hardcoded hex outside list
+- [ ] Font sizes use agreed scale — no random `font-size: 17px`
+- [ ] Spacing uses system — no arbitrary margin/padding
+- [ ] Border radius/shadow per `StyleGuide § Component Styles`
+- [ ] Breakpoints per `StyleGuide § Responsive & Breakpoints`
+
+**Example findings:**
 ```
-Contoh temuan:
-❌ SC-06 MINOR: Tombol menggunakan bg-blue-500 padahal StyleGuide menetapkan Primary = bg-blue-600
-❌ SC-06 MINOR: Card menggunakan padding: 14px, di luar sistem spacing (harus 8px, 16px, 24px)
+❌ SC-06 MINOR: Button uses bg-blue-500, StyleGuide defines Primary = bg-blue-600
+❌ SC-06 MINOR: Card padding 14px, outside spacing system (must be 8px, 16px, 24px)
 ```
 
 ---
 
 ## [SC-07] Task Completion
-**Baca:** `project-context/Task.md`
 
-> **Konteks penting:** Jika skill ini dijalankan dari `bug-fix` (tidak ada task baru di Task.md untuk bug tersebut), tandai SC-07 sebagai **N/A** dan lanjutkan — bukan BLOCKER. SC-07 hanya berlaku dalam konteks `developer` workflow.
+**Read:** `project-context/Task.md`
 
-- [ ] Semua file yang disebutkan di task sudah dibuat atau dimodifikasi
-- [ ] Semua Acceptance Criteria di task ini terpenuhi — cek satu per satu
-- [ ] Dokumen yang direferensikan di task sudah dikonsultasi (`schema.md#users`, dll.)
-- [ ] Task tidak setengah jalan — tidak ada bagian yang dikerjakan tapi belum selesai
-- [ ] Jika task punya `Traceability IDs`, semua ID itu valid dan mengarah ke artefak upstream yang nyata
+> **Important:** If running from `bug-fix` (no new Task.md entries), mark SC-07 as **N/A** and continue — not BLOCKER. SC-07 applies in `developer` workflow only.
 
+- [ ] All task-mentioned files created/modified
+- [ ] All task Acceptance Criteria met — check each
+- [ ] Referenced documents consulted (`schema.md#users`, etc.)
+- [ ] Task not half-done — no incomplete work
+- [ ] If task has traceability IDs, all valid and point to real upstream artifacts
+
+**Example findings:**
 ```
-Contoh temuan:
-❌ SC-07 BLOCKER: Task 2.3 Acceptance Criteria: "404 jika user tidak ada" — tidak diimplementasikan
-❌ SC-07 MAJOR: Task menyebut membuat src/services/user.service.ts — file belum ada
+❌ SC-07 BLOCKER: Task 2.3 AC "404 if user missing" not implemented
+❌ SC-07 MAJOR: Task mentions creating src/services/user.service.ts — file missing
 ```
 
 ---
 
-## Self-Review Sebelum Lapor
+## Self-Review Before Reporting
 
-> **Wajib dijalankan sebelum membuat Output Format.** Spec compliance sering hanya dijalankan sekali per fase — pastikan tidak ada yang terlewat.
+> **Mandatory before Output Format.** Compliance often runs once per phase — ensure nothing missed.
 
-Setelah semua SC-01 s.d. SC-07 diperiksa, lakukan satu putaran review ulang:
+1. **Verify all 7 items** (SC-01 through SC-07) truly checked — not skipped. "OK" items actually checked, not bypassed.
+2. **Re-read each finding** — severity proportional? Code examples quoted accurately?
+3. **Ask self:** *"If developer fixes all findings and compliance re-runs, will new findings appear?"* If yes, add now.
+4. **Re-check Task.md acceptance criteria** one more time — this is most often missed.
 
-1. **Verifikasi semua 7 item** (SC-01 s.d. SC-07) sudah benar-benar diperiksa — bukan hanya yang tampak ada masalah. Item yang hasilnya "OK" harus memang sudah dicek, bukan di-skip.
-2. **Baca ulang setiap temuan** — apakah severity sudah proporsional? Apakah contoh kode yang bermasalah sudah dikutip dengan akurat?
-3. **Tanya diri sendiri:** *"Jika developer memperbaiki semua temuan ini dan spec-compliance dijalankan lagi, apakah akan ada temuan baru?"* Jika ya, tambahkan sekarang.
-4. **Cek acceptance criteria di Task.md** satu per satu lagi — ini yang paling sering terlewat.
-
-Hanya setelah self-review ini selesai, buat laporan di bawah.
+Only after self-review, create report.
 
 ---
 
 ## Output Format
 
-Laporan ini **ditampilkan di chat pada sesi saat ini**. Jangan simpan ke file terpisah kecuali user secara eksplisit meminta artefak report. Secara default, report ini bersifat ephemeral dan dipakai sebagai gate sebelum lanjut ke `code-review`.
+Report shown in chat this session. Don't save to file unless user explicitly requests artifact. Default: ephemeral report used as gate before `code-review`.
 
 ```markdown
 ## Spec Compliance Report
 
-**Task/Fase:** [nama task atau nama fase]
-**Scope:** [file-file yang direview]
-**Status:** [✅ LULUS | ⚠️ ADA MINOR | 🔴 ADA MAJOR | 💥 ADA BLOCKER]
+**Task/Phase:** [name]
+**Scope:** [files reviewed]
+**Status:** [✅ PASS | ⚠️ MINOR ISSUES | 🔴 MAJOR ISSUES | 💥 BLOCKER]
 
-| Dokumen | Status | Temuan |
-|---------|--------|--------|
+| Document | Status | Finding |
+|----------|--------|---------|
 | project-context/PRD.md | ✅ OK | — |
-| project-context/architecture.md | 🔴 MAJOR | SC-02: query DB di route handler |
+| project-context/architecture.md | 🔴 MAJOR | SC-02: DB query in route handler |
 | project-context/schema.md | ✅ OK | — |
-| project-context/api.md | ⚠️ MINOR | SC-04: field hasNext hilang |
+| project-context/api.md | ⚠️ MINOR | SC-04: field "hasNext" missing |
 | project-context/rules.md | ✅ OK | — |
-| project-context/StyleGuide.md | ⚠️ MINOR | SC-06: warna hardcoded |
-| project-context/Task.md | 💥 BLOCKER | SC-07: acceptance criteria tidak terpenuhi |
+| project-context/StyleGuide.md | ⚠️ MINOR | SC-06: hardcoded color |
+| project-context/Task.md | 💥 BLOCKER | SC-07: AC not met |
 
-### Detail Temuan
-[daftar temuan per item]
+### Detailed Findings
+[per-item findings list]
 ```
 
 ---
 
-## Aturan Eksekusi
+## Execution Rules
 
 ```
-💥 BLOCKER → Perbaiki sekarang. Setelah diperbaiki, **jalankan spec-compliance lagi** sebelum lanjut ke code-review.
-🔴 MAJOR   → Perbaiki sebelum fase berikutnya. Setelah diperbaiki, **jalankan spec-compliance lagi**.
-⚠️ MINOR   → Catat, tanyakan ke user.
-ℹ️ INFO    → Catatan ringan — backlog, tidak wajib diperbaiki sekarang.
-✅ OK      → Lanjut ke code-review skill.
+💥 BLOCKER → Fix now. After fixing, **re-run spec-compliance** before code-review.
+🔴 MAJOR   → Fix before next phase. After fixing, **re-run spec-compliance**.
+⚠️ MINOR   → Report to user, ask.
+ℹ️ INFO    → Light note — backlog, not urgent.
+✅ OK      → Proceed to code-review skill.
 ```
+```
+
+---
+

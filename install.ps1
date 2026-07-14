@@ -35,6 +35,24 @@ function Copy-Skills($Dest) {
   }
 }
 
+function Normalize-Language($Value) {
+  $trimmed = $Value.Trim()
+  switch ($trimmed.ToLowerInvariant()) {
+    "" { return "indonesian" }
+    "id" { return "indonesian" }
+    "indo" { return "indonesian" }
+    "indonesia" { return "indonesian" }
+    "indonesian" { return "indonesian" }
+    "bahasa indonesia" { return "indonesian" }
+    "en" { return "english" }
+    "eng" { return "english" }
+    "english" { return "english" }
+    "inggris" { return "english" }
+    "bahasa inggris" { return "english" }
+    default { return $trimmed.ToLowerInvariant() }
+  }
+}
+
 # ─── Checkbox selector (↑/↓ Spasi Enter) ────────────────────────────────────
 $AllToolDisplay = @(
   "GitHub Copilot    -> .github\skills\"
@@ -119,14 +137,37 @@ if ($ToolSelected.Count -gt 0 -and $ToolSelected -notcontains 'codex') {
 # ─── Save selected tools ───────────────────────────────────────────────────────
 Set-Content ".agents\macca-tools.txt" ($Selected -join "`n")
 
-# ─── Nama developer & project ─────────────────────────────────────────────────
+# ─── Nama developer, project, & language preferences ──────────────────────────
 Write-Host ""
 $DEV_NAME     = Read-Host "  Kamu mau di panggil apa? (Kosong = Skip)"
 $PROJECT_NAME = Read-Host "  Nama project ini apa? (Kosong = Skip)"
-if ($DEV_NAME -ne "" -or $PROJECT_NAME -ne "") {
-  Set-Content -Path ".agents\developer-config.json" -Value "{`n  `"name`": `"$DEV_NAME`",`n  `"project`": `"$PROJECT_NAME`"`n}"
+$COMMUNICATION_LANGUAGE = Read-Host "  Bahasa komunikasi yang anda inginkan? (Kosong = Bahasa Indonesia)"
+$DOCUMENT_LANGUAGE      = Read-Host "  Bahasa dokumen yang dihasilkan? (Kosong = Bahasa Indonesia)"
+
+if ($COMMUNICATION_LANGUAGE -eq "") { $COMMUNICATION_LANGUAGE = "Bahasa Indonesia" }
+if ($DOCUMENT_LANGUAGE -eq "")      { $DOCUMENT_LANGUAGE = "Bahasa Indonesia" }
+
+if ($DEV_NAME -ne "" -or $PROJECT_NAME -ne "" -or $COMMUNICATION_LANGUAGE -ne "" -or $DOCUMENT_LANGUAGE -ne "") {
+  $DeveloperConfig = [ordered]@{
+    name = $DEV_NAME
+    project = $PROJECT_NAME
+    languagePreferences = [ordered]@{
+      communication = [ordered]@{
+        raw = $COMMUNICATION_LANGUAGE
+        normalized = Normalize-Language $COMMUNICATION_LANGUAGE
+      }
+      documents = [ordered]@{
+        raw = $DOCUMENT_LANGUAGE
+        normalized = Normalize-Language $DOCUMENT_LANGUAGE
+      }
+    }
+  }
+
+  $DeveloperConfig | ConvertTo-Json -Depth 5 | Set-Content -Path ".agents\developer-config.json"
   if ($DEV_NAME -ne "")     { Write-Host "  Nama developer disimpan: $DEV_NAME" }
   if ($PROJECT_NAME -ne "") { Write-Host "  Nama project disimpan:   $PROJECT_NAME" }
+  Write-Host "  Bahasa komunikasi disimpan: $COMMUNICATION_LANGUAGE"
+  Write-Host "  Bahasa dokumen disimpan:    $DOCUMENT_LANGUAGE"
 }
 
 # ─── Cleanup & done ────────────────────────────────────────────────────────────
